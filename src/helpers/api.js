@@ -48,20 +48,29 @@ export function deleteCookie(name) {
     document.cookie = name + '=; expires=' + date.toUTCString();
 }
 
+export function quickCheckToken() {
+    const currentURI = window.location.pathname.substr(1);
+    if (!['login', 'register'].includes(currentURI)) {
+        if (!getCookie(config.cookie_name)) {
+            return false;
+        }
+    }
+    return true;
+}
+
 export function checkTokenValid() {
-    /**
-     * if empty cookie, redirect to login
-     * else call to backend to check token valid or not
-     */
-    if(!getCookie(config.cookie_name)){
-        window.location.href = '/login';
-    }else{
-        const params = new FormData();
-        params.append('token', getCookie(config.cookie_name));
-        callAPI('checkToken', params, function (res) {
-            if (!res.success) {
-                window.location.href = '/login';
-            }
-        })
+    const currentURI = window.location.pathname.substr(1);
+    if (!['login', 'register'].includes(currentURI)) {
+        if (!getCookie(config.cookie_name)) {
+            window.location.href = '/login';
+        }else{
+            const params = new FormData();
+            params.append('token', getCookie(config.cookie_name));
+            callAPI('checkToken', params, function (res) {
+                if (!res.success) {
+                    window.location.href = '/login';
+                }
+            });
+        }
     }
 }

@@ -1,14 +1,15 @@
-import {useEffect} from 'react';
-import {checkTokenValid} from "../helpers/api";
+import {quickCheckToken} from "../helpers/api";
+import {Redirect} from 'react-router-dom';
 
 function Home() {
-    useEffect(() => {
-        checkTokenValid();
-    });
-
-    return (
-        <h1>Home</h1>
-    );
+    const logined = quickCheckToken();
+    if (logined) {
+        return (
+            <h1>Home</h1>
+        );
+    } else {
+        return (<Redirect to="/login"/>);
+    }
 }
 
 export default Home;
