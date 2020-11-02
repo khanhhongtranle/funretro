@@ -16,7 +16,7 @@ function Header() {
 
     return (
             <Navbar bg="primary" variant="dark">
-                <Navbar.Brand href="#home">Funretro</Navbar.Brand>
+                <Navbar.Brand href="/">Funretro</Navbar.Brand>
                 <Nav className="mr-auto">
                     <Button variant="light" onClick={logoutHandler}>Logout</Button>
                     <Button onClick={accountHandler} style={{marginLeft: "20px"}} variant="outline-light">Account</Button>
