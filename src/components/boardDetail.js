@@ -33,21 +33,23 @@ const board = {
     ]
 };
 
-function BoardDetail() {
+function BoardDetail(props) {
     const logined = quickCheckToken();
     const [detail, setDetail] = useState([]);
+    const [boardName, setBoardName] = useState('Board Name');
 
     useEffect(() => {
         let mounted = true;
 
         const params = new FormData();
         params.append('token', getCookie(config.cookie_name));
-        //params.append('board_id', getCookie(config.cookie_user_id));
+        params.append('board_id', props.match.params.id);
 
         callAPI('getBoardDetail', params, function (res) {
             if (res.success) {
+                console.log(res.data);
                 let board_detail = board;
-                for (let d of res.data ) {
+                for (let d of res.data['board_details'] ) {
                     if (d.type === 'went well') {
                         let objectCard = {
                             id: d.id,
@@ -73,6 +75,7 @@ function BoardDetail() {
                 }
                 if (mounted) {
                     setDetail(board_detail);
+                    setBoardName(res.data['board_name']);
                 }
             }
         });
@@ -110,7 +113,7 @@ function BoardDetail() {
                 <Header />
                 <div style={{margin:"20px 30px"}}>
                     <div>
-                        <span style={{fontSize: "30px"}}>Board's Name</span>
+                        <span style={{fontSize: "30px"}}>{boardName}</span>
                         <Button style={{fontSize: "10px", margin: "10px 0 20px 30px"}} variant="outline-primary">Share board</Button>
                     </div>
 

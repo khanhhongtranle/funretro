@@ -2,6 +2,7 @@ import {Form, Button, Container, Card} from 'react-bootstrap';
 import {useState} from "react";
 import {callAPI, setCookie} from "../helpers/api";
 import {config} from "../config";
+import {Link} from "react-router-dom";
 
 function Login() {
     const [username, setUsername] = useState("");
@@ -38,6 +39,7 @@ function Login() {
                         <Form.Control type="password" placeholder="Password" onChange={e => setPassword(e.target.value)}/>
                     </Form.Group>
                     <Button onClick={actionLogin} variant="primary" type="button">Login</Button>
+                    <Link style={{marginLeft: "20px"}} to="/signup">Sign up</Link>
                 </Form>
             </Card>
         </Container>

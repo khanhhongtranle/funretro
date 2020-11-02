@@ -1,14 +1,10 @@
 import {callAPI, checkTokenValid, getCookie, quickCheckToken, setCookie} from "../helpers/api";
-import {BrowserRouter, Redirect} from 'react-router-dom';
+import {BrowserRouter, Redirect, Link} from 'react-router-dom';
 import {Container, Row, Col, Card, Navbar, Nav, Button} from "react-bootstrap";
 import React, {useEffect, useState} from "react";
 import {config} from "../config";
 import Header from "./header";
 
-
-function moreHandler() {
-    window.location.href = "/detail";
-}
 
 function Home() {
     const logined = quickCheckToken();
@@ -56,7 +52,9 @@ function Home() {
                                         <Card.Text>
                                             Date Created: {board['date_created']}
                                         </Card.Text>
-                                        <Button variant="link" onClick={moreHandler}>More</Button>
+                                        <Link to={'/detail/'+board['id']}>
+                                            More
+                                        </Link>
                                         <Card.Link>
                                             Share Link
                                         </Card.Link>

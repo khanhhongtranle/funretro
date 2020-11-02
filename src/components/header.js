@@ -10,11 +10,16 @@ function Header() {
         window.location.href = "/";
     }
 
+    function accountHandler(){
+        window.location.href = "/account";
+    }
+
     return (
             <Navbar bg="primary" variant="dark">
                 <Navbar.Brand href="#home">Funretro</Navbar.Brand>
                 <Nav className="mr-auto">
                     <Button variant="light" onClick={logoutHandler}>Logout</Button>
+                    <Button onClick={accountHandler} style={{marginLeft: "20px"}} variant="outline-light">Account</Button>
                 </Nav>
             </Navbar>
     );
