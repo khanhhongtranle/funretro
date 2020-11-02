@@ -29,6 +29,9 @@ switch ($_GET['action']) {
     case 'getBoards':
         getBoards();
         break;
+    case 'getBoardDetail':
+        getBoardDetail();
+        break;
     default:
         notFound();
         break;
@@ -85,5 +88,11 @@ function getBoards()
 
     global $db;
     $data = $db->query("select * from boards where user_id = '{$un_id}' ")->fetchAll();
+    responseJson(array('success'=>1,'data'=>$data));
+}
+
+function getBoardDetail(){
+    global $db;
+    $data = $db->query("select * from board_detail")->fetchAll();
     responseJson(array('success'=>1,'data'=>$data));
 }

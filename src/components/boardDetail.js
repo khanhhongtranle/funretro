@@ -1,10 +1,10 @@
-import {callAPI, checkTokenValid, getCookie, quickCheckToken, setCookie} from "../helpers/api";
-import {BrowserRouter, Redirect} from 'react-router-dom';
-import {Container, Row, Col, Card, Navbar, Nav, Button} from "react-bootstrap";
+import {callAPI, getCookie, quickCheckToken} from "../helpers/api";
+import { Redirect} from 'react-router-dom';
+import {Container, Row, Button} from "react-bootstrap";
 import React, {useEffect, useState} from "react";
 import {config} from "../config";
 import Header from "./header";
-import Board, { moveCard } from "@lourenci/react-kanban";
+import Board, { moveCard, addColumn } from "@lourenci/react-kanban";
 import "@lourenci/react-kanban/dist/styles.css";
 
 const board = {
@@ -33,52 +33,77 @@ const board = {
     ]
 };
 
-function UncontrolledBoard() {
-    return (
-        <Board
-            allowRemoveLane
-            allowRenameColumn
-            allowRemoveCard
-            onLaneRemove={console.log}
-            onCardRemove={console.log}
-            onLaneRename={console.log}
-            initialBoard={board}
-            allowAddCard={{ on: "top" }}
-            onNewCardConfirm={draftCard => ({
-                id: new Date().getTime(),
-                ...draftCard
-            })}
-            onCardNew={console.log}
-        />
-    );
-}
-
 function BoardDetail() {
     const logined = quickCheckToken();
     const [detail, setDetail] = useState([]);
 
     useEffect(() => {
-        // let mounted = true;
-        //
-        // const params = new FormData();
-        // params.append('token', getCookie(config.cookie_name));
-        // params.append('board_id', getCookie(config.cookie_user_id));
-        //
-        // callAPI('getBoards', params, function (res) {
-        //     if (res.success) {
-        //         console.log(res);
-        //         if (mounted) {
-        //             //setBoards(res.data);
-        //         }
-        //     }
-        // });
-        //
-        // return () => {
-        //     mounted = false;
-        // };
+        let mounted = true;
 
-    },[]);
+        const params = new FormData();
+        params.append('token', getCookie(config.cookie_name));
+        //params.append('board_id', getCookie(config.cookie_user_id));
 
+        callAPI('getBoardDetail', params, function (res) {
+            if (res.success) {
+                let board_detail = board;
+                for (let d of res.data ) {
+                    if (d.type === 'went well') {
+                        let objectCard = {
+                            id: d.id,
+                            title: d.description,
+                            description: d.description,
+                        };
+                        board_detail.columns[0].cards.push(objectCard);
+                    } else if (d.type === 'to improve') {
+                        let objectCard = {
+                            id: d.id,
+                            title: d.description,
+                            description: d.description,
+                        };
+                        board_detail.columns[1].cards.push(objectCard);
+                    } else if (d.type === 'action items') {
+                        let objectCard = {
+                            id: d.id,
+                            title: d.description,
+                            description: d.description,
+                        };
+                        board_detail.columns[2].cards.push(objectCard);
+                    }
+                }
+                if (mounted) {
+                    setDetail(board_detail);
+                }
+            }
+        });
+
+        return () => {
+            mounted = false;
+        };
+
+    },[detail]);
+
+
+    function UncontrolledBoard() {
+        return (
+            <Board
+                allowRemoveLane
+                allowRenameColumn
+                allowRemoveCard
+                onLaneRemove={console.log}
+                onCardRemove={console.log}
+                onLaneRename={console.log}
+                initialBoard={board}
+                allowAddCard={{ on: "top" }}
+                onNewCardConfirm={draftCard => ({
+                    id: new Date().getTime(),
+                    ...draftCard
+                })}
+                onCardNew={console.log}
+            />
+        );
+    }
+    
     if (logined) {
         return (
             <Container fluid>

@@ -6,9 +6,9 @@ import {config} from "../config";
 import Header from "./header";
 
 
-// function moreHandler(id) {
-//     window.location.href = "/detail";
-// }
+function moreHandler() {
+    window.location.href = "/detail";
+}
 
 function Home() {
     const logined = quickCheckToken();
@@ -56,7 +56,7 @@ function Home() {
                                         <Card.Text>
                                             Date Created: {board['date_created']}
                                         </Card.Text>
-                                        <Button variant="link">More</Button>
+                                        <Button variant="link" onClick={moreHandler}>More</Button>
                                         <Card.Link>
                                             Share Link
                                         </Card.Link>
