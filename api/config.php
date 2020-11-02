@@ -3,7 +3,7 @@ return array(
     'db' => array(
         'host' => 'localhost',
         'user' => 'root',
-        'pass' => '123456',
+        'pass' => '',
         'dbname' => 'funretro'
     ),
     'jwt_token_key' => 'khanhhongtranle'

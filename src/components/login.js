@@ -11,9 +11,11 @@ function Login() {
         const params = new FormData();
         params.append('username', username);
         params.append('password', password);
+
         callAPI('login', params, function (res) {
             if (res.success) {
                 setCookie(config.cookie_name, res.token);
+                setCookie(config.cookie_user_id, res.user_id);
                 window.location.href = "/";
             } else {
                 alert('Login failed');

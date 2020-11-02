@@ -26,6 +26,9 @@ switch ($_GET['action']) {
     case 'checkToken':
         checkToken();
         break;
+    case 'getBoards':
+        getBoards();
+        break;
     default:
         notFound();
         break;
@@ -40,7 +43,8 @@ function login()
         if (md5($_POST['password']) == $user['hash_pass']) {
             responseJson(array(
                 'success' => 1,
-                'token' => getToken($user)
+                'token' => getToken($user),
+                'user_id' => $user['id']
             ));
         }
     }
@@ -73,4 +77,13 @@ function checkToken()
     } else {
         responseJson(array('success' => 0));
     }
+}
+
+function getBoards()
+{
+    $un_id = $_POST['user_id'];
+
+    global $db;
+    $data = $db->query("select * from boards where user_id = '{$un_id}' ")->fetchAll();
+    responseJson(array('success'=>1,'data'=>$data));
 }
