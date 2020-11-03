@@ -1,6 +1,6 @@
 import {callAPI, getCookie, quickCheckToken} from "../helpers/api";
 import { Redirect} from 'react-router-dom';
-import {Container, Row, Button} from "react-bootstrap";
+import {Container, Row, Button, Modal, Form} from "react-bootstrap";
 import React, {useEffect, useState} from "react";
 import {config} from "../config";
 import Header from "./header";
@@ -37,6 +37,12 @@ function BoardDetail(props) {
     const logined = quickCheckToken();
     const [detail, setDetail] = useState([]);
     const [boardName, setBoardName] = useState('Board Name');
+    const [newBoardName, setNewBoardName] = useState('');
+
+    const [show, setShow] = useState(false);
+
+    const handleClose = () => setShow(false);
+    const handleShow = () => setShow(true);
 
     useEffect(() => {
         let mounted = true;
@@ -76,6 +82,7 @@ function BoardDetail(props) {
                 if (mounted) {
                     setDetail(board_detail);
                     setBoardName(res.data['board_name']);
+                    setNewBoardName(res.data['board_name']);
                 }
             }
         });
@@ -86,16 +93,27 @@ function BoardDetail(props) {
 
     },[detail]);
 
+    const handleSaveBoard = () =>{
+        const params = new FormData();
+        params.append('token', getCookie(config.cookie_name));
+        params.append('board_id', props.match.params.id);
+        params.append('board_name', newBoardName);
+
+        callAPI('editBoard', params, function (res) {
+            if (res.success) {
+                setShow(false);
+                setBoardName(newBoardName);
+            }
+        });
+    }
 
     function UncontrolledBoard() {
         return (
             <Board
-                allowRemoveLane
                 allowRenameColumn
                 allowRemoveCard
-                onLaneRemove={console.log}
+                disableColumnDrag
                 onCardRemove={console.log}
-                onLaneRename={console.log}
                 initialBoard={board}
                 allowAddCard={{ on: "top" }}
                 onNewCardConfirm={draftCard => ({
@@ -114,6 +132,7 @@ function BoardDetail(props) {
                 <div style={{margin:"20px 30px"}}>
                     <div>
                         <span style={{fontSize: "30px"}}>{boardName}</span>
+                        <Button style={{margin: "10px 0 20px 30px"}} variant="link" onClick={() =>handleShow()}>Edit</Button>
                         <Button style={{fontSize: "10px", margin: "10px 0 20px 30px"}} variant="outline-primary">Share board</Button>
                     </div>
 
@@ -121,6 +140,26 @@ function BoardDetail(props) {
                         <UncontrolledBoard />
                     </Row>
                 </div>
+
+                <Modal show={show} onHide={handleClose} animation={false}>
+                    <Modal.Header closeButton>
+                        <Modal.Title>Edit board</Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body>
+                        <Form.Group controlId="boardname">
+                            <Form.Label>Board name</Form.Label>
+                            <Form.Control type="text" value={newBoardName} onChange={e => setNewBoardName(e.target.value)}/>
+                        </Form.Group>
+                    </Modal.Body>
+                    <Modal.Footer>
+                        <Button variant="secondary" onClick={handleClose}>
+                            Close
+                        </Button>
+                        <Button variant="primary" onClick={handleSaveBoard}>
+                            Save
+                        </Button>
+                    </Modal.Footer>
+                </Modal>
             </Container>
         );
     } else {

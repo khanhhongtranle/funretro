@@ -41,6 +41,15 @@ switch ($_GET['action']) {
     case 'updateUserInfo':
         updateUserInfo();
         break;
+    case 'saveBoard':
+        saveBoard();
+        break;
+    case 'deleteBoard':
+        deleteBoard();
+        break;
+    case 'editBoard':
+        editBoard();
+        break;
     default:
         notFound();
         break;
@@ -169,4 +178,34 @@ function updateUserInfo()
         }
     }
     responseJson(array('success'=>1,'data'=>$data));
+}
+
+function saveBoard()
+{
+    global $db;
+    $now = date("Y-m-d");
+    $db->query("insert into boards(board_name,user_id, date_created, share_url)
+                values( '{$_POST['board_name']}', '{$_POST['user_id']}','{$now}','')");
+
+    $data = $db->query("select * from boards where user_id = '{$_POST['user_id']}' ")->fetchAll();
+
+    responseJson(array('success'=>1, 'data'=>$data));
+}
+
+function deleteBoard()
+{
+    global $db;
+    $db->query("delete from boards where id='{$_POST['id']}'");
+
+    $data = $db->query("select * from boards where user_id = '{$_POST['user_id']}' ")->fetchAll();
+
+    responseJson(array('success'=>1, 'data'=>$data));
+}
+
+function editBoard(){
+    global $db;
+    $db->query("update boards set board_name='{$_POST['board_name']}' 
+                 where id='{$_POST['board_id']}'");
+
+    responseJson(array('success' => 1));
 }
