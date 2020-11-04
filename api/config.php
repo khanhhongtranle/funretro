@@ -1,7 +1,7 @@
 <?php
 return array(
     'db' => array(
-        'host' => 'localhost',
+        'host' => '52.77.203.212',
         'user' => 'root',
         'pass' => '',
         'dbname' => 'funretro'

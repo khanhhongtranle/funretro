@@ -50,6 +50,9 @@ switch ($_GET['action']) {
     case 'editBoard':
         editBoard();
         break;
+    case 'addNewCard':
+        addNewCard();
+        break;
     default:
         notFound();
         break;
@@ -106,10 +109,11 @@ function getBoards()
 
     global $db;
     $data = $db->query("select * from boards where user_id = '{$un_id}' ")->fetchAll();
-    responseJson(array('success'=>1,'data'=>$data));
+    responseJson(array('success' => 1, 'data' => $data));
 }
 
-function getBoardDetail(){
+function getBoardDetail()
+{
 
     $board_id = $_POST['board_id'];
 
@@ -118,7 +122,7 @@ function getBoardDetail(){
     $data['board_name'] = $data['board_name'][0]['board_name'];
 
     $data['board_details'] = $db->query("select * from board_detail where board_id = '{$board_id}' ")->fetchAll();
-    responseJson(array('success'=>1,'data'=>$data));
+    responseJson(array('success' => 1, 'data' => $data));
 }
 
 function signup()
@@ -132,17 +136,18 @@ function signup()
     global $db;
 
     $data_user = $db->query("select * from users where  username = '{$username}' ")->fetchAll();
-    if(count($data_user)>0){
-        responseJson(array('success'=>0));
+    if (count($data_user) > 0) {
+        responseJson(array('success' => 0));
     }
 
     $db->query("insert into users(username,hash_pass, email, first_name, last_name)
                 values( '{$username}', '{$password}', '{$email}', '{$firstname}', '{$lastname}' )");
 
-    responseJson(array('success'=>1));
+    responseJson(array('success' => 1));
 }
 
-function getUserInfo(){
+function getUserInfo()
+{
     $id = $_POST['user_id'];
 
     global $db;
@@ -150,7 +155,7 @@ function getUserInfo(){
     $data = $db->query("select * from users where id = '{$id}'")->fetchAll();
     $data = $data[0];
 
-    responseJson(array('success'=>1,'data'=>$data));
+    responseJson(array('success' => 1, 'data' => $data));
 }
 
 function updateUserInfo()
@@ -162,7 +167,7 @@ function updateUserInfo()
                  last_name='{$_POST['lastname']}'
                  where username='{$_POST['username']}'");
 
-    if(!empty($_POST['oldPassword']) && !empty($_POST['newPassword'])){
+    if (!empty($_POST['oldPassword']) && !empty($_POST['newPassword'])) {
         //kiểm tra old password
         $res = $db->query("select * from users where username='{$_POST['username']}'")->fetchAll();
         if (count($res) > 0) {
@@ -172,12 +177,12 @@ function updateUserInfo()
                 $pass = md5($_POST['newPassword']);
                 $db->query("update users set hash_pass='{$pass}' where username='{$_POST['username']}'");
                 $data['change_pass'] = 1;
-            }else{
+            } else {
                 $data['old_pass_not_valid'] = 1;
             }
         }
     }
-    responseJson(array('success'=>1,'data'=>$data));
+    responseJson(array('success' => 1, 'data' => $data));
 }
 
 function saveBoard()
@@ -189,7 +194,16 @@ function saveBoard()
 
     $data = $db->query("select * from boards where user_id = '{$_POST['user_id']}' ")->fetchAll();
 
-    responseJson(array('success'=>1, 'data'=>$data));
+    responseJson(array('success' => 1, 'data' => $data));
+}
+
+function addNewCard()
+{
+    global $db;
+    $db->query("insert into board_detail(board_id, description, type, title)
+                values( '{$_POST['board_id']}', '{$_POST['description']}','{$_POST['type']}','{$_POST['title']}')");
+
+    responseJson(array('success' => 1));
 }
 
 function deleteBoard()
@@ -199,10 +213,11 @@ function deleteBoard()
 
     $data = $db->query("select * from boards where user_id = '{$_POST['user_id']}' ")->fetchAll();
 
-    responseJson(array('success'=>1, 'data'=>$data));
+    responseJson(array('success' => 1, 'data' => $data));
 }
 
-function editBoard(){
+function editBoard()
+{
     global $db;
     $db->query("update boards set board_name='{$_POST['board_name']}' 
                  where id='{$_POST['board_id']}'");

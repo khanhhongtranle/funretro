@@ -1,41 +1,34 @@
 import {callAPI, getCookie, quickCheckToken} from "../helpers/api";
-import { Redirect} from 'react-router-dom';
+import {Redirect} from 'react-router-dom';
 import {Container, Row, Button, Modal, Form} from "react-bootstrap";
 import React, {useEffect, useState} from "react";
 import {config} from "../config";
 import Header from "./header";
-import Board, { moveCard, addColumn } from "@lourenci/react-kanban";
-import "@lourenci/react-kanban/dist/styles.css";
-
-const board = {
-    columns: [
-        {
-            id: 1,
-            title: "Went Well",
-            cards: [
-
-            ]
-        },
-        {
-            id: 2,
-            title: "To Improve",
-            cards: [
-
-            ]
-        },
-        {
-            id: 3,
-            title: "Action Items",
-            cards: [
-
-            ]
-        },
-    ]
-};
+import Board from 'react-trello';
 
 function BoardDetail(props) {
     const logined = quickCheckToken();
-    const [detail, setDetail] = useState([]);
+
+    const [board, setBoard] = useState({
+        lanes: [
+            {
+                id: "went well",
+                title: "Went Well",
+                cards: []
+            },
+            {
+                id: "to improve",
+                title: "To Improve",
+                cards: []
+            },
+            {
+                id: "action items",
+                title: "Action Items",
+                cards: []
+            },
+        ]
+    });
+
     const [boardName, setBoardName] = useState('Board Name');
     const [newBoardName, setNewBoardName] = useState('');
 
@@ -55,32 +48,32 @@ function BoardDetail(props) {
             if (res.success) {
                 console.log(res.data);
                 let board_detail = board;
-                for (let d of res.data['board_details'] ) {
+                for (let d of res.data['board_details']) {
                     if (d.type === 'went well') {
                         let objectCard = {
                             id: d.id,
-                            title: d.description,
-                            description: d.description,
+                            title: d.title,
+                            description: d.description
                         };
-                        board_detail.columns[0].cards.push(objectCard);
+                        board_detail.lanes[0].cards.push(objectCard);
                     } else if (d.type === 'to improve') {
                         let objectCard = {
                             id: d.id,
-                            title: d.description,
-                            description: d.description,
+                            title: d.title,
+                            description: d.description
                         };
-                        board_detail.columns[1].cards.push(objectCard);
+                        board_detail.lanes[1].cards.push(objectCard);
                     } else if (d.type === 'action items') {
                         let objectCard = {
                             id: d.id,
-                            title: d.description,
-                            description: d.description,
+                            title: d.title,
+                            description: d.description
                         };
-                        board_detail.columns[2].cards.push(objectCard);
+                        board_detail.lanes[2].cards.push(objectCard);
                     }
                 }
                 if (mounted) {
-                    setDetail(board_detail);
+                    setBoard(board_detail);
                     setBoardName(res.data['board_name']);
                     setNewBoardName(res.data['board_name']);
                 }
@@ -91,9 +84,9 @@ function BoardDetail(props) {
             mounted = false;
         };
 
-    },[detail]);
+    }, []);
 
-    const handleSaveBoard = () =>{
+    const handleSaveBoard = () => {
         const params = new FormData();
         params.append('token', getCookie(config.cookie_name));
         params.append('board_id', props.match.params.id);
@@ -107,37 +100,38 @@ function BoardDetail(props) {
         });
     }
 
-    function UncontrolledBoard() {
-        return (
-            <Board
-                allowRenameColumn
-                allowRemoveCard
-                disableColumnDrag
-                onCardRemove={console.log}
-                initialBoard={board}
-                allowAddCard={{ on: "top" }}
-                onNewCardConfirm={draftCard => ({
-                    id: new Date().getTime(),
-                    ...draftCard
-                })}
-                onCardNew={console.log}
-            />
-        );
+    function handleCardAdd(card, land_id) {
+        console.log(card);
+        console.log(land_id);
+        const params = new FormData();
+        params.append('token', getCookie(config.cookie_name));
+        params.append('board_id', props.match.params.id);
+        params.append('type', land_id);
+        params.append('title', card.title);
+        params.append('description', card.description);
+
+        callAPI('addNewCard', params, function (res) {
+            console.log(res);
+        });
     }
-    
+
     if (logined) {
         return (
             <Container fluid>
-                <Header />
-                <div style={{margin:"20px 30px"}}>
+                <Header/>
+                <div style={{margin: "20px 30px"}}>
                     <div>
                         <span style={{fontSize: "30px"}}>{boardName}</span>
-                        <Button style={{margin: "10px 0 20px 30px"}} variant="link" onClick={() =>handleShow()}>Edit</Button>
+                        <Button style={{margin: "10px 0 20px 30px"}} variant="link" onClick={() => handleShow()}>Edit</Button>
                         <Button style={{fontSize: "10px", margin: "10px 0 20px 30px"}} variant="outline-primary">Share board</Button>
                     </div>
 
                     <Row>
-                        <UncontrolledBoard />
+                        <Board
+                            editable
+                            data={board}
+                            onCardAdd={handleCardAdd}
+                        />
                     </Row>
                 </div>
 
