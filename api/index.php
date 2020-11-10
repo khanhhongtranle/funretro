@@ -3,6 +3,7 @@ header("Access-Control-Allow-Origin: *");
 
 require_once 'jwtHelper.php';
 require_once 'db.php';
+require_once 'GoogleAPI/vendor/autoload.php';
 $config = include 'config.php';
 global $db;
 $db = new db($config['db']['host'], $config['db']['user'], $config['db']['pass'], $config['db']['dbname']);
@@ -61,6 +62,9 @@ switch ($_GET['action']) {
         break;
     case 'updateCard':
         updateCard();
+        break;
+    case 'getGoogleAuthLink':
+        PHPGoogle::getLinkToGetAuthorCode(array('https://www.googleapis.com/auth/userinfo.profile'));
         break;
     default:
         notFound();
