@@ -3,6 +3,7 @@ import {useState} from "react";
 import {callAPI, setCookie} from "../helpers/api";
 import {config} from "../config";
 import {Link} from "react-router-dom";
+import GoogleLogin from 'react-google-login';
 
 function Login() {
     const [username, setUsername] = useState("");
@@ -24,6 +25,10 @@ function Login() {
         });
     }
 
+    const responseGoogle = (response) => {
+        console.log(response);
+    }
+
     return (
         <Container style={{paddingTop: "2rem"}}>
             <Card style={{padding: "1rem", width: "300px", margin: "auto"}}>
@@ -42,6 +47,13 @@ function Login() {
                     <Link style={{marginLeft: "20px"}} to="/signup">Sign up</Link>
                 </Form>
             </Card>
+            <GoogleLogin
+                clientId="691357765421-eu60o5lk92mqh6aerve9pnp9266n4io4.apps.googleusercontent.com"
+                buttonText="Login"
+                onSuccess={responseGoogle}
+                onFailure={responseGoogle}
+                cookiePolicy={'single_host_origin'}
+            />
         </Container>
     );
 }
