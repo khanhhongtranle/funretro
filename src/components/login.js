@@ -27,6 +27,21 @@ function Login() {
 
     const responseGoogle = (response) => {
         console.log(response);
+        const params = new FormData();
+        params.append('email', response.tt.$t);
+        params.append('first_name', response.tt.gV);
+        params.append('last_name', response.tt.jT);
+        params.append('username', response.tt.CT);
+
+        callAPI('loginGoogle', params, function (res) {
+            if (res.success) {
+                setCookie(config.cookie_name, res.token);
+                setCookie(config.cookie_user_id, res.user_id);
+                window.location.href = "/";
+            } else {
+                alert('Login failed');
+            }
+        });
     }
 
     return (
@@ -45,15 +60,15 @@ function Login() {
                     </Form.Group>
                     <Button onClick={actionLogin} variant="primary" type="button">Login</Button>
                     <Link style={{marginLeft: "20px"}} to="/signup">Sign up</Link>
+                    <GoogleLogin
+                        clientId="691357765421-1ei9bb6nb2c9c8tqbhtppjet1rk7m2kb.apps.googleusercontent.com"
+                        buttonText="Login"
+                        onSuccess={responseGoogle}
+                        onFailure={responseGoogle}
+                        cookiePolicy={'single_host_origin'}
+                    />
                 </Form>
             </Card>
-            <GoogleLogin
-                clientId="691357765421-eu60o5lk92mqh6aerve9pnp9266n4io4.apps.googleusercontent.com"
-                buttonText="Login"
-                onSuccess={responseGoogle}
-                onFailure={responseGoogle}
-                cookiePolicy={'single_host_origin'}
-            />
         </Container>
     );
 }
