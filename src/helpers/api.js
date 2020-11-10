@@ -50,7 +50,7 @@ export function deleteCookie(name) {
 
 export function quickCheckToken() {
     const currentURI = window.location.pathname.substr(1);
-    if (!['login', 'signup','loginGoogle'].includes(currentURI)) {
+    if (!['login', 'signup','loginGoogle','loginFacebook'].includes(currentURI)) {
         if (!getCookie(config.cookie_name)) {
             return false;
         }
@@ -60,7 +60,7 @@ export function quickCheckToken() {
 
 export function checkTokenValid() {
     const currentURI = window.location.pathname.substr(1);
-    if (!['login', 'signup','loginGoogle'].includes(currentURI)) {
+    if (!['login', 'signup','loginGoogle','loginFacebook'].includes(currentURI)) {
         if (!getCookie(config.cookie_name)) {
             window.location.href = '/login';
         }else{

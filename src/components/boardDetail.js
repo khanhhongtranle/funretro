@@ -26,12 +26,12 @@ const initData = {
     ]
 }
 
-
 export function BoardDetail(props) {
 
     const logined = quickCheckToken();
 
     const [data, setData] = useState(initData);
+    const [eventBus, setEventBus] = useState();
 
     const [boardName, setBoardName] = useState("board name");
     const [newBoardName, setNewBoardName] = useState("");
@@ -146,21 +146,23 @@ export function BoardDetail(props) {
 
         callAPI('updateCard', params, res => {
             if (res.success) {
-                setShowEditCardModal(false);
 
                 //update board data
                 let newData = initData;
-                for (let lane of data.lanes) {
-                    for (let card of lane.cards) {
-                        if (card.id === res.data.id) {
-                            newData.lanes.find(col => col.id === lane.id).cards.push(res.data);
-                        }else{
-                            newData.lanes.find(col => col.id === lane.id).cards.push(card);
-                        }
-                    }
-                }
-                setData(newData);
+                // for (let lane of data.lanes) {
+                //     for (let card of lane.cards) {
+                //         if (card.id === res.data.id) {
+                //             newData.lanes.find(col => col.id === lane.id).cards.push(res.data);
+                //         }else{
+                //             newData.lanes.find(col => col.id === lane.id).cards.push(card);
+                //         }
+                //     }
+                // }
+
             }
+            setData(initData);
+            setShowEditCardModal(false);
+
         });
     }
 
@@ -179,6 +181,8 @@ export function BoardDetail(props) {
             description: newDes
         });
     }
+
+
 
 
     if (logined) {
@@ -206,6 +210,7 @@ export function BoardDetail(props) {
                             onCardClick={handleCardClick}
                             style={{backgroundColor: 'white'}}
                             data={data}
+                            onDataChange={() => {console.log(data)}}
                         />
                     </Row>
                 </div>
