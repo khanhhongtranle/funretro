@@ -56,6 +56,12 @@ switch ($_GET['action']) {
     case 'deleteCard':
         deleteCard();
         break;
+    case 'getCard':
+        getCard();
+        break;
+    case 'updateCard':
+        updateCard();
+        break;
     default:
         notFound();
         break;
@@ -229,5 +235,18 @@ function addCard(){
 function deleteCard(){
     global $db;
     $db->query("delete from board_detail where id = '{$_POST['card_id']}'");
+    responseJson(array('success' => 1));
+}
+
+function getCard(){
+    global $db;
+    $data = $db->query("select * from board_detail where id = {$_POST['card_id']}")->fetchAll();
+    responseJson(array('success' => 1 ,
+                                         'data' => $data ));
+}
+
+function updateCard(){
+    global $db;
+    $db->query("update board_detail set title = '{$_POST['title']}', description = '{$_POST['description']}' where id = '{$_POST['card_id']}'");
     responseJson(array('success' => 1));
 }

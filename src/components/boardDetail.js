@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from "react";
 import Board from "react-trello";
-import {Container, Button, Modal, Form, Row} from "react-bootstrap";
+import {Button, Container, Form, Modal, Row} from "react-bootstrap";
 import Header from "./header";
 import {callAPI, getCookie, quickCheckToken} from "../helpers/api";
 import {Redirect} from "react-router-dom";
@@ -36,9 +36,14 @@ export function BoardDetail (props) {
     const logined = quickCheckToken();
 
     const [data, setData] = useState(initData);
+
     const [boardName, setBoardName] = useState("board name");
-    const [show, setShow] = useState(false);
-    const [newBoardName, setNewBoardName] = useState("")
+    const [newBoardName, setNewBoardName] = useState("");
+
+    const [editingCard, setEditingCard] = useState({});
+
+    const [showEditBoardModal, setShowEditBoardModal] = useState(false);
+    const [showEditCardModal, setShowEditCardModal] = useState(false);
 
     useEffect(() => {
         let mounted = true;
@@ -103,7 +108,7 @@ export function BoardDetail (props) {
 
         callAPI('editBoard', params, function (res) {
             if (res.success) {
-                setShow(false);
+                setShowEditBoardModal(false);
                 setBoardName(newBoardName);
             }
         });
@@ -116,6 +121,57 @@ export function BoardDetail (props) {
         console.log(index);
     }
 
+    function handleCardClick(cardId, metadata, laneId){
+        const params = new FormData();
+        params.append('token', getCookie(config.cookie_name));
+        params.append('card_id', cardId);
+        callAPI('getCard', params, res => {
+            if (res.success && res.data.length > 0) {
+                setShowEditCardModal(true);
+                const gotCard = {
+                   id: res.data[0].id,
+                   title: res.data[0].title,
+                   description: res.data[0].description
+                };
+
+                setEditingCard(gotCard);
+            }
+        });
+    }
+
+    function handleSaveCard(cardId){
+        const params = new FormData();
+        params.append('token', getCookie(config.cookie_name));
+        params.append('card_id', cardId);
+        params.append('title', editingCard.title);
+        params.append('description', editingCard.description);
+
+        callAPI('updateCard', params, res => {
+            if (res.success) {
+              setShowEditCardModal(false);
+
+
+            }
+        });
+    }
+
+    function handleChangeCardTitle(newTitle){
+        setEditingCard({
+            id: editingCard.id,
+            title: newTitle,
+            description: editingCard.description
+        });
+    }
+
+    function handleChangeCardDescription(newDes){
+        setEditingCard({
+            id: editingCard.id,
+            title: editingCard.title,
+            description: newDes
+        });
+    }
+
+
     if (logined) {
         return (
             <Container fluid>
@@ -123,7 +179,7 @@ export function BoardDetail (props) {
                 <div style={{margin: "20px 30px"}}>
                     <div>
                         <span style={{fontSize: "30px"}}>{boardName}</span>
-                        <Button style={{margin: "10px 0 20px 30px"}} variant="link" onClick={ ()=> {setShow(true)}}>Edit</Button>
+                        <Button style={{margin: "10px 0 20px 30px"}} variant="link" onClick={ ()=> {setShowEditBoardModal(true)}}>Edit</Button>
                         <Button style={{fontSize: "10px", margin: "10px 0 20px 30px"}} variant="outline-primary">Share board</Button>
                     </div>
 
@@ -136,13 +192,14 @@ export function BoardDetail (props) {
                             onCardAdd={handleCardAdd}
                             onCardDelete={handleCardDelete}
                             onCardMoveAcrossLanes={handleMoveCard}
+                            onCardClick={handleCardClick}
                             style={{backgroundColor: 'white'}}
                             data={data}
                         />
                     </Row>
                 </div>
 
-                <Modal show={show} onHide={() => {setShow(false)}} animation={false}>
+                <Modal show={showEditBoardModal} onHide={() => {setShowEditBoardModal(false)}} animation={false}>
                     <Modal.Header closeButton>
                         <Modal.Title>Edit board</Modal.Title>
                     </Modal.Header>
@@ -153,10 +210,34 @@ export function BoardDetail (props) {
                         </Form.Group>
                     </Modal.Body>
                     <Modal.Footer>
-                        <Button variant="secondary" onClick={() => {setShow(false)}}>
+                        <Button variant="secondary" onClick={() => {setShowEditBoardModal(false)}}>
                             Close
                         </Button>
                         <Button variant="primary" onClick={() => handleSaveBoard()}>
+                            Save
+                        </Button>
+                    </Modal.Footer>
+                </Modal>
+
+                <Modal show={showEditCardModal} onHide={() => {setShowEditCardModal(false)}} animation={false}>
+                    <Modal.Header closeButton>
+                        <Modal.Title>Edit card</Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body>
+                        <Form.Group controlId="cardtitle">
+                            <Form.Label>Card title</Form.Label>
+                            <Form.Control type="text" value={editingCard.title} onChange={e=>{ handleChangeCardTitle(e.target.value)} }/>
+                        </Form.Group>
+                        <Form.Group controlId="carddescription">
+                            <Form.Label>Card description</Form.Label>
+                            <Form.Control type="text" value={editingCard.description} onChange={ e => {handleChangeCardDescription(e.target.value)}}/>
+                        </Form.Group>
+                    </Modal.Body>
+                    <Modal.Footer>
+                        <Button variant="secondary" onClick={() => {setShowEditCardModal(false)}}>
+                            Close
+                        </Button>
+                        <Button variant="primary" onClick={() => handleSaveCard(editingCard.id)}>
                             Save
                         </Button>
                     </Modal.Footer>
