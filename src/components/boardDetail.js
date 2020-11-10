@@ -11,16 +11,12 @@ const initData = {
         {
             "id": "WENTWELL",
             "title": "WENT WELL",
-            "cards": [
-
-            ]
+            "cards": []
         },
         {
             "id": "TOIMPROVE",
             "title": "TO IMPROVE",
-            "cards": [
-
-            ]
+            "cards": []
         },
         {
             "id": "ACTIONITEMS",
@@ -31,7 +27,7 @@ const initData = {
 }
 
 
-export function BoardDetail (props) {
+export function BoardDetail(props) {
 
     const logined = quickCheckToken();
 
@@ -52,19 +48,19 @@ export function BoardDetail (props) {
         params.append('token', getCookie(config.cookie_name));
         params.append('board_id', props.match.params.id);
         callAPI("getBoardDetail", params, function (res) {
-            if (res.success){
+            if (res.success) {
                 let boardDetails = res.data['board_details'];
                 let copyData = initData;
-                for (let record of boardDetails){
+                for (let record of boardDetails) {
                     let newCard = {
-                        id: record.id.toString() ,
+                        id: record.id.toString(),
                         title: record.title,
                         description: record.description,
                     }
                     copyData.lanes.find(col => col.id === record['type']).cards.push(newCard);
                 }
 
-                if (mounted){
+                if (mounted) {
                     setData(copyData);
                     setBoardName(res.data['board_name']);
                     setNewBoardName(res.data['board_name']);
@@ -72,10 +68,12 @@ export function BoardDetail (props) {
             }
         });
 
-        return () => { mounted = false };
-    },[]);
+        return () => {
+            mounted = false
+        };
+    }, []);
 
-    function handleCardAdd(card, laneId){
+    function handleCardAdd(card, laneId) {
         let params = new FormData();
         params.append('token', getCookie(config.cookie_name));
         params.append('board_id', props.match.params.id);
@@ -83,18 +81,18 @@ export function BoardDetail (props) {
         params.append('description', card.description);
         params.append('type', laneId);
         callAPI('addCard', params, res => {
-            if (res.success){
+            if (res.success) {
                 console.log(1);
             }
         })
     }
 
-    function handleCardDelete(cardId, laneId){
+    function handleCardDelete(cardId, laneId) {
         let params = new FormData();
         params.append('token', getCookie(config.cookie_name));
         params.append('card_id', cardId);
         callAPI('deleteCard', params, res => {
-            if (res.success){
+            if (res.success) {
                 console.log(1);
             }
         })
@@ -114,14 +112,14 @@ export function BoardDetail (props) {
         });
     }
 
-    function handleMoveCard(fromLaneId, toLaneId, cardId, index){
+    function handleMoveCard(fromLaneId, toLaneId, cardId, index) {
         console.log(fromLaneId);
         console.log(toLaneId);
         console.log(cardId);
         console.log(index);
     }
 
-    function handleCardClick(cardId, metadata, laneId){
+    function handleCardClick(cardId, metadata, laneId) {
         const params = new FormData();
         params.append('token', getCookie(config.cookie_name));
         params.append('card_id', cardId);
@@ -129,9 +127,9 @@ export function BoardDetail (props) {
             if (res.success && res.data.length > 0) {
                 setShowEditCardModal(true);
                 const gotCard = {
-                   id: res.data[0].id,
-                   title: res.data[0].title,
-                   description: res.data[0].description
+                    id: res.data[0].id,
+                    title: res.data[0].title,
+                    description: res.data[0].description
                 };
 
                 setEditingCard(gotCard);
@@ -139,7 +137,7 @@ export function BoardDetail (props) {
         });
     }
 
-    function handleSaveCard(cardId){
+    function handleSaveCard(cardId) {
         const params = new FormData();
         params.append('token', getCookie(config.cookie_name));
         params.append('card_id', cardId);
@@ -148,14 +146,25 @@ export function BoardDetail (props) {
 
         callAPI('updateCard', params, res => {
             if (res.success) {
-              setShowEditCardModal(false);
+                setShowEditCardModal(false);
 
-
+                //update board data
+                let newData = initData;
+                for (let lane of data.lanes) {
+                    for (let card of lane.cards) {
+                        if (card.id === res.data.id) {
+                            newData.lanes.find(col => col.id === lane.id).cards.push(res.data);
+                        }else{
+                            newData.lanes.find(col => col.id === lane.id).cards.push(card);
+                        }
+                    }
+                }
+                setData(newData);
             }
         });
     }
 
-    function handleChangeCardTitle(newTitle){
+    function handleChangeCardTitle(newTitle) {
         setEditingCard({
             id: editingCard.id,
             title: newTitle,
@@ -163,7 +172,7 @@ export function BoardDetail (props) {
         });
     }
 
-    function handleChangeCardDescription(newDes){
+    function handleChangeCardDescription(newDes) {
         setEditingCard({
             id: editingCard.id,
             title: editingCard.title,
@@ -179,7 +188,9 @@ export function BoardDetail (props) {
                 <div style={{margin: "20px 30px"}}>
                     <div>
                         <span style={{fontSize: "30px"}}>{boardName}</span>
-                        <Button style={{margin: "10px 0 20px 30px"}} variant="link" onClick={ ()=> {setShowEditBoardModal(true)}}>Edit</Button>
+                        <Button style={{margin: "10px 0 20px 30px"}} variant="link" onClick={() => {
+                            setShowEditBoardModal(true)
+                        }}>Edit</Button>
                         <Button style={{fontSize: "10px", margin: "10px 0 20px 30px"}} variant="outline-primary">Share board</Button>
                     </div>
 
@@ -199,18 +210,22 @@ export function BoardDetail (props) {
                     </Row>
                 </div>
 
-                <Modal show={showEditBoardModal} onHide={() => {setShowEditBoardModal(false)}} animation={false}>
+                <Modal show={showEditBoardModal} onHide={() => {
+                    setShowEditBoardModal(false)
+                }} animation={false}>
                     <Modal.Header closeButton>
                         <Modal.Title>Edit board</Modal.Title>
                     </Modal.Header>
                     <Modal.Body>
                         <Form.Group controlId="boardname">
                             <Form.Label>Board name</Form.Label>
-                            <Form.Control type="text" value={newBoardName} onChange = {e => setNewBoardName(e.target.value)} />
+                            <Form.Control type="text" value={newBoardName} onChange={e => setNewBoardName(e.target.value)}/>
                         </Form.Group>
                     </Modal.Body>
                     <Modal.Footer>
-                        <Button variant="secondary" onClick={() => {setShowEditBoardModal(false)}}>
+                        <Button variant="secondary" onClick={() => {
+                            setShowEditBoardModal(false)
+                        }}>
                             Close
                         </Button>
                         <Button variant="primary" onClick={() => handleSaveBoard()}>
@@ -219,22 +234,30 @@ export function BoardDetail (props) {
                     </Modal.Footer>
                 </Modal>
 
-                <Modal show={showEditCardModal} onHide={() => {setShowEditCardModal(false)}} animation={false}>
+                <Modal show={showEditCardModal} onHide={() => {
+                    setShowEditCardModal(false)
+                }} animation={false}>
                     <Modal.Header closeButton>
                         <Modal.Title>Edit card</Modal.Title>
                     </Modal.Header>
                     <Modal.Body>
                         <Form.Group controlId="cardtitle">
                             <Form.Label>Card title</Form.Label>
-                            <Form.Control type="text" value={editingCard.title} onChange={e=>{ handleChangeCardTitle(e.target.value)} }/>
+                            <Form.Control type="text" value={editingCard.title} onChange={e => {
+                                handleChangeCardTitle(e.target.value)
+                            }}/>
                         </Form.Group>
                         <Form.Group controlId="carddescription">
                             <Form.Label>Card description</Form.Label>
-                            <Form.Control type="text" value={editingCard.description} onChange={ e => {handleChangeCardDescription(e.target.value)}}/>
+                            <Form.Control type="text" value={editingCard.description} onChange={e => {
+                                handleChangeCardDescription(e.target.value)
+                            }}/>
                         </Form.Group>
                     </Modal.Body>
                     <Modal.Footer>
-                        <Button variant="secondary" onClick={() => {setShowEditCardModal(false)}}>
+                        <Button variant="secondary" onClick={() => {
+                            setShowEditCardModal(false)
+                        }}>
                             Close
                         </Button>
                         <Button variant="primary" onClick={() => handleSaveCard(editingCard.id)}>
@@ -244,10 +267,9 @@ export function BoardDetail (props) {
                 </Modal>
             </Container>
         );
-    }
-    else {
-            return (
-                <Redirect to ="/login"/>
-            )
+    } else {
+        return (
+            <Redirect to="/login"/>
+        )
     }
 }

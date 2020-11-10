@@ -225,28 +225,36 @@ function editBoard()
     responseJson(array('success' => 1));
 }
 
-function addCard(){
+function addCard()
+{
     global $db;
     $db->query("insert into board_detail(board_id, description, title, type)  values ('{$_POST['board_id']}', '{$_POST['description']}', '{$_POST['title']}' , '{$_POST['type']}')");
     responseJson(array('success' => 1));
 }
 
 
-function deleteCard(){
+function deleteCard()
+{
     global $db;
     $db->query("delete from board_detail where id = '{$_POST['card_id']}'");
     responseJson(array('success' => 1));
 }
 
-function getCard(){
+function getCard()
+{
     global $db;
     $data = $db->query("select * from board_detail where id = {$_POST['card_id']}")->fetchAll();
-    responseJson(array('success' => 1 ,
-                                         'data' => $data ));
+    responseJson(array('success' => 1,
+        'data' => $data));
 }
 
-function updateCard(){
+function updateCard()
+{
     global $db;
     $db->query("update board_detail set title = '{$_POST['title']}', description = '{$_POST['description']}' where id = '{$_POST['card_id']}'");
-    responseJson(array('success' => 1));
+    responseJson(array('success' => 1, 'data' => array(
+        'title' => $_POST['title'],
+        'id' => $_POST['card_id'],
+        'description' => $_POST['description']
+    )));
 }
