@@ -4,7 +4,7 @@ import {BrowserRouter, Switch, Route} from "react-router-dom";
 import Home from "./components/home";
 import {useEffect} from 'react';
 import {checkTokenValid} from "./helpers/api";
-import BoardDetail from "./components/boardDetail";
+import {BoardDetail} from "./components/boardDetail";
 import Signup from "./components/signup";
 import Account from "./components/account";
 

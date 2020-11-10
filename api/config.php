@@ -1,9 +1,9 @@
 <?php
 return array(
     'db' => array(
-        'host' => '52.77.203.212',
+        'host' => 'localhost',
         'user' => 'root',
-        'pass' => '',
+        'pass' => '123456',
         'dbname' => 'funretro'
     ),
     'jwt_token_key' => 'khanhhongtranle'

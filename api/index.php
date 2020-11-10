@@ -50,8 +50,11 @@ switch ($_GET['action']) {
     case 'editBoard':
         editBoard();
         break;
-    case 'addNewCard':
-        addNewCard();
+    case 'addCard':
+        addCard();
+        break;
+    case 'deleteCard':
+        deleteCard();
         break;
     default:
         notFound();
@@ -197,15 +200,6 @@ function saveBoard()
     responseJson(array('success' => 1, 'data' => $data));
 }
 
-function addNewCard()
-{
-    global $db;
-    $db->query("insert into board_detail(board_id, description, type, title)
-                values( '{$_POST['board_id']}', '{$_POST['description']}','{$_POST['type']}','{$_POST['title']}')");
-
-    responseJson(array('success' => 1));
-}
-
 function deleteBoard()
 {
     global $db;
@@ -222,5 +216,18 @@ function editBoard()
     $db->query("update boards set board_name='{$_POST['board_name']}' 
                  where id='{$_POST['board_id']}'");
 
+    responseJson(array('success' => 1));
+}
+
+function addCard(){
+    global $db;
+    $db->query("insert into board_detail(board_id, description, title, type)  values ('{$_POST['board_id']}', '{$_POST['description']}', '{$_POST['title']}' , '{$_POST['type']}')");
+    responseJson(array('success' => 1));
+}
+
+
+function deleteCard(){
+    global $db;
+    $db->query("delete from board_detail where id = '{$_POST['card_id']}'");
     responseJson(array('success' => 1));
 }

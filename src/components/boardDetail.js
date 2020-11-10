@@ -1,41 +1,44 @@
-import {callAPI, getCookie, quickCheckToken} from "../helpers/api";
-import {Redirect} from 'react-router-dom';
-import {Container, Row, Button, Modal, Form} from "react-bootstrap";
 import React, {useEffect, useState} from "react";
-import {config} from "../config";
+import Board from "react-trello";
+import {Container, Button, Modal, Form, Row} from "react-bootstrap";
 import Header from "./header";
-import Board from 'react-trello';
+import {callAPI, getCookie, quickCheckToken} from "../helpers/api";
+import {Redirect} from "react-router-dom";
+import {config} from "../config";
 
-function BoardDetail(props) {
+const initData = {
+    "lanes": [
+        {
+            "id": "WENTWELL",
+            "title": "WENT WELL",
+            "cards": [
+
+            ]
+        },
+        {
+            "id": "TOIMPROVE",
+            "title": "TO IMPROVE",
+            "cards": [
+
+            ]
+        },
+        {
+            "id": "ACTIONITEMS",
+            "title": "ACTION ITEMS",
+            "cards": []
+        }
+    ]
+}
+
+
+export function BoardDetail (props) {
+
     const logined = quickCheckToken();
 
-    const [board, setBoard] = useState({
-        lanes: [
-            {
-                id: "went well",
-                title: "Went Well",
-                cards: []
-            },
-            {
-                id: "to improve",
-                title: "To Improve",
-                cards: []
-            },
-            {
-                id: "action items",
-                title: "Action Items",
-                cards: []
-            },
-        ]
-    });
-
-    const [boardName, setBoardName] = useState('Board Name');
-    const [newBoardName, setNewBoardName] = useState('');
-
+    const [data, setData] = useState(initData);
+    const [boardName, setBoardName] = useState("board name");
     const [show, setShow] = useState(false);
-
-    const handleClose = () => setShow(false);
-    const handleShow = () => setShow(true);
+    const [newBoardName, setNewBoardName] = useState("")
 
     useEffect(() => {
         let mounted = true;
@@ -43,50 +46,56 @@ function BoardDetail(props) {
         const params = new FormData();
         params.append('token', getCookie(config.cookie_name));
         params.append('board_id', props.match.params.id);
-
-        callAPI('getBoardDetail', params, function (res) {
-            if (res.success) {
-                console.log(res.data);
-                let board_detail = board;
-                for (let d of res.data['board_details']) {
-                    if (d.type === 'went well') {
-                        let objectCard = {
-                            id: d.id,
-                            title: d.title,
-                            description: d.description
-                        };
-                        board_detail.lanes[0].cards.push(objectCard);
-                    } else if (d.type === 'to improve') {
-                        let objectCard = {
-                            id: d.id,
-                            title: d.title,
-                            description: d.description
-                        };
-                        board_detail.lanes[1].cards.push(objectCard);
-                    } else if (d.type === 'action items') {
-                        let objectCard = {
-                            id: d.id,
-                            title: d.title,
-                            description: d.description
-                        };
-                        board_detail.lanes[2].cards.push(objectCard);
+        callAPI("getBoardDetail", params, function (res) {
+            if (res.success){
+                let boardDetails = res.data['board_details'];
+                let copyData = initData;
+                for (let record of boardDetails){
+                    let newCard = {
+                        id: record.id.toString() ,
+                        title: record.title,
+                        description: record.description,
                     }
+                    copyData.lanes.find(col => col.id === record['type']).cards.push(newCard);
                 }
-                if (mounted) {
-                    setBoard(board_detail);
+
+                if (mounted){
+                    setData(copyData);
                     setBoardName(res.data['board_name']);
                     setNewBoardName(res.data['board_name']);
                 }
             }
         });
 
-        return () => {
-            mounted = false;
-        };
+        return () => { mounted = false };
+    },[]);
 
-    }, []);
+    function handleCardAdd(card, laneId){
+        let params = new FormData();
+        params.append('token', getCookie(config.cookie_name));
+        params.append('board_id', props.match.params.id);
+        params.append('title', card.title);
+        params.append('description', card.description);
+        params.append('type', laneId);
+        callAPI('addCard', params, res => {
+            if (res.success){
+                console.log(1);
+            }
+        })
+    }
 
-    const handleSaveBoard = () => {
+    function handleCardDelete(cardId, laneId){
+        let params = new FormData();
+        params.append('token', getCookie(config.cookie_name));
+        params.append('card_id', cardId);
+        callAPI('deleteCard', params, res => {
+            if (res.success){
+                console.log(1);
+            }
+        })
+    }
+
+    function handleSaveBoard() {
         const params = new FormData();
         params.append('token', getCookie(config.cookie_name));
         params.append('board_id', props.match.params.id);
@@ -100,19 +109,11 @@ function BoardDetail(props) {
         });
     }
 
-    function handleCardAdd(card, land_id) {
-        console.log(card);
-        console.log(land_id);
-        const params = new FormData();
-        params.append('token', getCookie(config.cookie_name));
-        params.append('board_id', props.match.params.id);
-        params.append('type', land_id);
-        params.append('title', card.title);
-        params.append('description', card.description);
-
-        callAPI('addNewCard', params, function (res) {
-            console.log(res);
-        });
+    function handleMoveCard(fromLaneId, toLaneId, cardId, index){
+        console.log(fromLaneId);
+        console.log(toLaneId);
+        console.log(cardId);
+        console.log(index);
     }
 
     if (logined) {
@@ -122,43 +123,50 @@ function BoardDetail(props) {
                 <div style={{margin: "20px 30px"}}>
                     <div>
                         <span style={{fontSize: "30px"}}>{boardName}</span>
-                        <Button style={{margin: "10px 0 20px 30px"}} variant="link" onClick={() => handleShow()}>Edit</Button>
+                        <Button style={{margin: "10px 0 20px 30px"}} variant="link" onClick={ ()=> {setShow(true)}}>Edit</Button>
                         <Button style={{fontSize: "10px", margin: "10px 0 20px 30px"}} variant="outline-primary">Share board</Button>
                     </div>
 
                     <Row>
                         <Board
-                            editable
-                            data={board}
+                            cardDraggable={true}
+                            laneDraggable={false}
+                            draggable={true}
+                            editable={true}
                             onCardAdd={handleCardAdd}
+                            onCardDelete={handleCardDelete}
+                            onCardMoveAcrossLanes={handleMoveCard}
+                            style={{backgroundColor: 'white'}}
+                            data={data}
                         />
                     </Row>
                 </div>
 
-                <Modal show={show} onHide={handleClose} animation={false}>
+                <Modal show={show} onHide={() => {setShow(false)}} animation={false}>
                     <Modal.Header closeButton>
                         <Modal.Title>Edit board</Modal.Title>
                     </Modal.Header>
                     <Modal.Body>
                         <Form.Group controlId="boardname">
                             <Form.Label>Board name</Form.Label>
-                            <Form.Control type="text" value={newBoardName} onChange={e => setNewBoardName(e.target.value)}/>
+                            <Form.Control type="text" value={newBoardName} onChange = {e => setNewBoardName(e.target.value)} />
                         </Form.Group>
                     </Modal.Body>
                     <Modal.Footer>
-                        <Button variant="secondary" onClick={handleClose}>
+                        <Button variant="secondary" onClick={() => {setShow(false)}}>
                             Close
                         </Button>
-                        <Button variant="primary" onClick={handleSaveBoard}>
+                        <Button variant="primary" onClick={() => handleSaveBoard()}>
                             Save
                         </Button>
                     </Modal.Footer>
                 </Modal>
             </Container>
         );
-    } else {
-        return (<Redirect to="/login"/>);
+    }
+    else {
+            return (
+                <Redirect to ="/login"/>
+            )
     }
 }
-
-export default BoardDetail;
