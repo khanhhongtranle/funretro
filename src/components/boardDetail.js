@@ -338,6 +338,12 @@ export function BoardDetail(props) {
                         <Modal.Title>Share board with</Modal.Title>
                     </Modal.Header>
                     <Modal.Body>
+                        <Form.Group controlId="link">
+                            <Form.Label>
+                                Board URL
+                            </Form.Label>
+                            <Form.Control readOnly type="text"  value={window.location.href}/>
+                        </Form.Group>
                         <Form.Group controlId="shareEmail">
                             <Form.Label>
                                 Enter email you want to share this board
