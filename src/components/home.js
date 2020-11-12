@@ -10,6 +10,7 @@ function Home() {
     const logined = quickCheckToken();
     const [boards, setBoards] = useState([]);
     const [boardName, setBoardName] = useState("");
+    const [sharedBoards, setSharedBoards] = useState([]);
 
     const [show, setShow] = useState(false);
 
@@ -59,6 +60,17 @@ function Home() {
         callAPI('getBoards', params, function (res) {
             if (res.success) {
                 console.log(res);
+
+                let params1 = new FormData();
+                params1.append('token', getCookie(config.cookie_name));
+                params1.append('user_id', getCookie(config.cookie_user_id));
+                callAPI('getSharedBoards', params1, res =>{
+                    if (res.success){
+                        console.log(res);
+                        setSharedBoards(res.data);
+                    }
+                });
+
                 if (mounted) {
                     setBoards(res.data);
                 }
@@ -122,6 +134,35 @@ function Home() {
                         </Button>
                     </Modal.Footer>
                 </Modal>
+
+                <div style={{margin:"20px 30px"}}>
+                    <div>
+                        <span style={{fontSize: "30px"}}>Shared Boards</span>
+                    </div>
+
+                    <Row>
+                        {sharedBoards.map( board =>
+                            <Col xs>
+                                <Card style={{ width: '18rem',marginTop:"1rem" }}>
+                                    <Card.Body>
+                                        <Card.Title>{board['board_name']}</Card.Title>
+                                        <Card.Text>
+                                            User Created: {board['username']}
+                                        </Card.Text>
+                                        <Card.Text>
+                                            Date Created: {board['date_created']}
+                                        </Card.Text>
+                                        <Link to={'/detail/'+board['id']} style={{marginRight:"10px"}}>
+                                            <Button variant="link" type="button">
+                                                More
+                                            </Button>
+                                        </Link>
+                                    </Card.Body>
+                                </Card>
+                            </Col>
+                        )}
+                    </Row>
+                </div>
             </Container>
         );
     } else {

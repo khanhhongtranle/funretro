@@ -72,6 +72,9 @@ switch ($_GET['action']) {
     case 'getsharedEmails':
         getsharedEmails();
         break;
+    case 'getSharedBoards':
+        getSharedBoards();
+        break;
     default:
         notFound();
         break;
@@ -329,4 +332,28 @@ function getsharedEmails()
         'success' => 1,
         'data' => $emails
     ));
+}
+
+function getSharedBoards(){
+    global $db;
+
+   $res = $db->query("select b.board_name, b.date_created, b.id , us2.username
+                                from users
+                                         inner join share_boards sb on users.email = sb.email
+                                         inner join boards b on sb.board_id = b.id
+                                         inner join users us2 on us2.id = b.user_id
+                                where users.id = '{$_POST['user_id']}'
+                                union
+                                select b.board_name, b.date_created, b.id, us2.username
+                                from users
+                                         inner join share_boards sb on sb.email = 'all'
+                                         inner join boards b on sb.board_id = b.id
+                                         inner join users us2 on us2.id = b.user_id 
+                                         and us2.id <> users.id
+                                where users.id = '{$_POST['user_id']}'")->fetchAll();
+
+   responseJson(array(
+       'success' => 1,
+       'data' => $res
+   ));
 }
