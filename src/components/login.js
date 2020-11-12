@@ -48,7 +48,7 @@ function Login() {
     const responseFacebook = (response) => {
         console.log(response);
         const params = new FormData();
-        params.append('username', response.userID);
+        params.append('username', response.id);
         params.append('email', response.email);
         params.append('first_name', response.name);
         params.append('last_name', '');

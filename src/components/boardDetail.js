@@ -1,10 +1,12 @@
 import React, {useEffect, useState} from "react";
 import Board from "react-trello";
-import {Button, Container, Form, Modal, Row} from "react-bootstrap";
+import {Button, Container, Form, Modal, Row, OverlayTrigger, Tooltip} from "react-bootstrap";
 import Header from "./header";
 import {callAPI, getCookie, quickCheckToken} from "../helpers/api";
 import {Redirect} from "react-router-dom";
 import {config} from "../config";
+import  {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
+import {faInfoCircle} from "@fortawesome/free-solid-svg-icons";
 
 const initData = {
     "lanes": [
@@ -40,6 +42,9 @@ export function BoardDetail(props) {
 
     const [showEditBoardModal, setShowEditBoardModal] = useState(false);
     const [showEditCardModal, setShowEditCardModal] = useState(false);
+    const [showShareBoardModal, setShowShareBoardModal] = useState(false);
+
+    const [sharedEmail, setSharedEmail] = useState("");
 
     useEffect(() => {
         let mounted = true;
@@ -182,8 +187,53 @@ export function BoardDetail(props) {
         });
     }
 
+    function HelperTooltip(){
+        return (<>
+            {['top'].map((placement) => (
+                <OverlayTrigger
+                    key='top'
+                    placement='top'
+                    overlay={
+                        <Tooltip id={`tooltip-'top`}>
+                           Enter "All": Share for all users. <br/>
+                            Each line for one email to share.
+                        </Tooltip>
+                    }
+                >
+                    <FontAwesomeIcon icon={faInfoCircle}/>
+                </OverlayTrigger>
+            ))}
+        </>);
+    }
 
+    function handleShare(){
+        const params = new FormData();
+        params.append('token', getCookie(config.cookie_name));
+        params.append('board_id', props.match.params.id);
+        callAPI('getsharedEmails', params, res => {
+            console.log(res);
+            if (res.success) {
+                setSharedEmail(res.data);
 
+                setShowShareBoardModal(true);
+            }
+        })
+    }
+
+    function handleSubmitShare(){
+        let params = new FormData();
+        params.append('token', getCookie(config.cookie_name));
+        params.append('board_id', props.match.params.id);
+        params.append('emails', sharedEmail);
+        callAPI('shareBoard', params, res => {
+            console.log(res);
+            if (res.success) {
+                console.log(1);
+            }
+
+            setShowShareBoardModal(false);
+        })
+    }
 
     if (logined) {
         return (
@@ -195,7 +245,10 @@ export function BoardDetail(props) {
                         <Button style={{margin: "10px 0 20px 30px"}} variant="link" onClick={() => {
                             setShowEditBoardModal(true)
                         }}>Edit</Button>
-                        <Button style={{fontSize: "10px", margin: "10px 0 20px 30px"}} variant="outline-primary">Share board</Button>
+                        <Button style={{fontSize: "10px", margin: "10px 0 20px 30px"}} variant="outline-primary"
+                                        onClick={handleShare}>
+                            Share board
+                        </Button>
                     </div>
 
                     <Row>
@@ -267,6 +320,32 @@ export function BoardDetail(props) {
                         </Button>
                         <Button variant="primary" onClick={() => handleSaveCard(editingCard.id)}>
                             Save
+                        </Button>
+                    </Modal.Footer>
+                </Modal>
+
+                <Modal show={showShareBoardModal} onHide={() => {
+                    setShowShareBoardModal(false)
+                }} animation={false}>
+                    <Modal.Header closeButton>
+                        <Modal.Title>Share board with</Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body>
+                        <Form.Group controlId="shareEmail">
+                            <Form.Label>
+                                Enter email you want to share this board
+                            </Form.Label>
+                            <HelperTooltip />
+                            <Form.Control as="textarea" type="text" rows="7" value={sharedEmail} onChange={(e) => setSharedEmail(e.target.value)}/>
+                        </Form.Group>
+                    </Modal.Body>
+                    <Modal.Footer>
+                        <Button variant="secondary" onClick={() => {
+                            setShowShareBoardModal(false)}}>
+                            Close
+                        </Button>
+                        <Button variant="primary" onClick={handleSubmitShare}>
+                            Submit
                         </Button>
                     </Modal.Footer>
                 </Modal>

@@ -96,9 +96,6 @@ function Home() {
                                             </Button>
                                         </Link>
                                         <Button variant="link" type="button" onClick={()=>handleDelete(board['id'])}>Delete</Button>
-                                        <Card.Link>
-                                            Share Link
-                                        </Card.Link>
                                     </Card.Body>
                                 </Card>
                             </Col>
@@ -108,12 +105,12 @@ function Home() {
 
                 <Modal show={show} onHide={handleClose} animation={false}>
                     <Modal.Header closeButton>
-                        <Modal.Title>Modal heading</Modal.Title>
+                        <Modal.Title>Create new board</Modal.Title>
                     </Modal.Header>
                     <Modal.Body>
                         <Form.Group controlId="boardname">
                             <Form.Label>Board name</Form.Label>
-                            <Form.Control type="text" placeholder="Username" onChange={e => setBoardName(e.target.value)}/>
+                            <Form.Control type="text"  onChange={e => setBoardName(e.target.value)}/>
                         </Form.Group>
                     </Modal.Body>
                     <Modal.Footer>

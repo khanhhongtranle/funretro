@@ -10,7 +10,7 @@ $db = new db($config['db']['host'], $config['db']['user'], $config['db']['pass']
 /**
  * check user had login, if login api will send include token
  */
-if (!in_array($_GET['action'], array('login', 'signup','loginGoogle', 'loginFacbook'))) {
+if (!in_array($_GET['action'], array('login', 'signup', 'loginGoogle', 'loginFacebook'))) {
     if (empty($_POST['token']) || decodeToken($_POST['token']) === false) {
         responseJson(array('success' => 0, 'message' => 'invalid token'));
     }
@@ -66,6 +66,12 @@ switch ($_GET['action']) {
     case 'loginFacebook':
         loginGoogle();
         break;
+    case 'shareBoard':
+        shareBoard();
+        break;
+    case 'getsharedEmails':
+        getsharedEmails();
+        break;
     default:
         notFound();
         break;
@@ -117,8 +123,6 @@ function loginGoogle()
         'success' => 0
     ));
 }
-
-
 
 function notFound()
 {
@@ -291,4 +295,38 @@ function updateCard()
         'id' => $_POST['card_id'],
         'description' => $_POST['description']
     )));
+}
+
+function shareBoard()
+{
+    $email_string = preg_split("/[\s,]+/", $_POST['emails']);
+    global $db;
+
+    $db->query("delete from share_boards where board_id = '{$_POST['board_id']}'");
+
+    foreach ($email_string as $email) {
+        if (strtolower($email) == 'all') {
+            $db->query("insert into share_boards(board_id, email) values ( '{$_POST['board_id']}' , 'all' )");
+        } else if (!empty($email)) {
+            $db->query("insert into share_boards(board_id, email) values ( '{$_POST['board_id']}' , '$email' )");
+        }
+    }
+
+    responseJson(array(
+        'success' => 1,
+    ));
+}
+
+function getsharedEmails()
+{
+    global $db;
+    $res = $db->query("select email from share_boards where board_id = '{$_POST['board_id']}'")->fetchAll();
+    $emails = '';
+    foreach ($res as $item) {
+        $emails .= $item['email'] . "\n";
+    }
+    responseJson(array(
+        'success' => 1,
+        'data' => $emails
+    ));
 }

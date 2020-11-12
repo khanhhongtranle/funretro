@@ -5,6 +5,7 @@ export function callAPI(action, data, callback, callbackError) {
     xmlHttp.onreadystatechange = () => {
         if (xmlHttp.readyState === 4) {
             if (xmlHttp.status === 200) {
+                console.log(xmlHttp.responseText);
                 callback(JSON.parse(xmlHttp.responseText));
             } else {
                 if (callbackError instanceof Function) {
