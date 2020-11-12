@@ -35,7 +35,25 @@ export function BoardDetail(props) {
             callAPI("getBoardDetail", params, res =>{
                 if (res.success) {
                     let boardDetails = res.data['board_details'];
-                    let copyData = initData;
+                    let copyData = {
+                        "lanes": [
+                            {
+                                "id": "WENTWELL",
+                                "title": "WENT WELL",
+                                "cards": []
+                            },
+                            {
+                                "id": "TOIMPROVE",
+                                "title": "TO IMPROVE",
+                                "cards": []
+                            },
+                            {
+                                "id": "ACTIONITEMS",
+                                "title": "ACTION ITEMS",
+                                "cards": []
+                            }
+                        ]
+                    };
                     for (let record of boardDetails) {
                         let newCard = {
                             id: record.id.toString(),
@@ -94,10 +112,17 @@ export function BoardDetail(props) {
     }
 
     function handleMoveCard(fromLaneId, toLaneId, cardId, index) {
-        console.log(fromLaneId);
+
         console.log(toLaneId);
         console.log(cardId);
-        console.log(index);
+
+        const params = new FormData();
+        params.append('token', getCookie(config.cookie_name));
+        params.append('card_id', cardId);
+        params.append('new_type', toLaneId);
+
+        callAPI('moveCard', params, function (res) {
+        });
     }
 
     function handleCardClick(cardId, metadata, laneId) {

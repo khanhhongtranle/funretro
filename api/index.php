@@ -75,6 +75,9 @@ switch ($_GET['action']) {
     case 'getSharedBoards':
         getSharedBoards();
         break;
+    case 'moveCard':
+        moveCard();
+        break;
     default:
         notFound();
         break;
@@ -356,4 +359,13 @@ function getSharedBoards(){
        'success' => 1,
        'data' => $res
    ));
+}
+
+function moveCard(){
+    global $db;
+    $db->query("update board_detail set type = '{$_POST['new_type']}' where  id = '{$_POST['card_id']}'");
+
+    responseJson(array(
+        'success' => 1
+    ));
 }
