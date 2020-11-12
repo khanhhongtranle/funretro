@@ -5,35 +5,15 @@ import Header from "./header";
 import {callAPI, getCookie, quickCheckToken} from "../helpers/api";
 import {Redirect} from "react-router-dom";
 import {config} from "../config";
-import  {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
+import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {faInfoCircle} from "@fortawesome/free-solid-svg-icons";
-
-const initData = {
-    "lanes": [
-        {
-            "id": "WENTWELL",
-            "title": "WENT WELL",
-            "cards": []
-        },
-        {
-            "id": "TOIMPROVE",
-            "title": "TO IMPROVE",
-            "cards": []
-        },
-        {
-            "id": "ACTIONITEMS",
-            "title": "ACTION ITEMS",
-            "cards": []
-        }
-    ]
-}
+import {initData} from "./data";
 
 export function BoardDetail(props) {
 
     const logined = quickCheckToken();
 
     const [data, setData] = useState(initData);
-    const [eventBus, setEventBus] = useState();
 
     const [boardName, setBoardName] = useState("board name");
     const [newBoardName, setNewBoardName] = useState("");
@@ -45,38 +25,34 @@ export function BoardDetail(props) {
     const [showShareBoardModal, setShowShareBoardModal] = useState(false);
 
     const [sharedEmail, setSharedEmail] = useState("");
+    const [mounted, setMounted] = useState(true);
 
     useEffect(() => {
-        let mounted = true;
-
-        const params = new FormData();
-        params.append('token', getCookie(config.cookie_name));
-        params.append('board_id', props.match.params.id);
-        callAPI("getBoardDetail", params, function (res) {
-            if (res.success) {
-                let boardDetails = res.data['board_details'];
-                let copyData = initData;
-                for (let record of boardDetails) {
-                    let newCard = {
-                        id: record.id.toString(),
-                        title: record.title,
-                        description: record.description,
+        if(mounted) {
+            const params = new FormData();
+            params.append('token', getCookie(config.cookie_name));
+            params.append('board_id', props.match.params.id);
+            callAPI("getBoardDetail", params, res =>{
+                if (res.success) {
+                    let boardDetails = res.data['board_details'];
+                    let copyData = initData;
+                    for (let record of boardDetails) {
+                        let newCard = {
+                            id: record.id.toString(),
+                            title: record.title,
+                            description: record.description,
+                        }
+                        copyData.lanes.find(col => col.id === record['type']).cards.push(newCard);
                     }
-                    copyData.lanes.find(col => col.id === record['type']).cards.push(newCard);
-                }
 
-                if (mounted) {
                     setData(copyData);
                     setBoardName(res.data['board_name']);
                     setNewBoardName(res.data['board_name']);
+                    setMounted(false);
                 }
-            }
-        });
-
-        return () => {
-            mounted = false
-        };
-    }, []);
+            });
+        }
+    }, [data]);
 
     function handleCardAdd(card, laneId) {
         let params = new FormData();
@@ -154,20 +130,18 @@ export function BoardDetail(props) {
 
                 //update board data
                 let newData = initData;
-                // for (let lane of data.lanes) {
-                //     for (let card of lane.cards) {
-                //         if (card.id === res.data.id) {
-                //             newData.lanes.find(col => col.id === lane.id).cards.push(res.data);
-                //         }else{
-                //             newData.lanes.find(col => col.id === lane.id).cards.push(card);
-                //         }
-                //     }
-                // }
-
+                for (let lane of data.lanes) {
+                    for (let card of lane.cards) {
+                        if (card.id === res.data.id) {
+                            newData.lanes.find(col => col.id === lane.id).cards.push(res.data);
+                        }else{
+                            newData.lanes.find(col => col.id === lane.id).cards.push(card);
+                        }
+                    }
+                }
+                setData(newData);
+                setShowEditCardModal(false);
             }
-            setData(initData);
-            setShowEditCardModal(false);
-
         });
     }
 
@@ -187,7 +161,7 @@ export function BoardDetail(props) {
         });
     }
 
-    function HelperTooltip(){
+    function HelperTooltip() {
         return (<>
             {['top'].map((placement) => (
                 <OverlayTrigger
@@ -195,7 +169,7 @@ export function BoardDetail(props) {
                     placement='top'
                     overlay={
                         <Tooltip id={`tooltip-'top`}>
-                           Enter "All": Share for all users. <br/>
+                            Enter "All": Share for all users. <br/>
                             Each line for one email to share.
                         </Tooltip>
                     }
@@ -206,12 +180,12 @@ export function BoardDetail(props) {
         </>);
     }
 
-    function handleShare(){
+    function handleShare() {
         const params = new FormData();
         params.append('token', getCookie(config.cookie_name));
         params.append('board_id', props.match.params.id);
         callAPI('getsharedEmails', params, res => {
-            console.log(res);
+            //console.log(res);
             if (res.success) {
                 setSharedEmail(res.data);
 
@@ -220,19 +194,39 @@ export function BoardDetail(props) {
         })
     }
 
-    function handleSubmitShare(){
+    function handleSubmitShare() {
         let params = new FormData();
         params.append('token', getCookie(config.cookie_name));
         params.append('board_id', props.match.params.id);
         params.append('emails', sharedEmail);
         callAPI('shareBoard', params, res => {
-            console.log(res);
+            //console.log(res);
             if (res.success) {
                 console.log(1);
             }
 
             setShowShareBoardModal(false);
         })
+    }
+
+    function HelperBoard() {
+        return (
+            <Board
+                cardDraggable={true}
+                laneDraggable={false}
+                draggable={true}
+                editable={true}
+                onCardAdd={handleCardAdd}
+                onCardDelete={handleCardDelete}
+                onCardMoveAcrossLanes={handleMoveCard}
+                onCardClick={handleCardClick}
+                style={{backgroundColor: 'white'}}
+                data={data}
+                onDataChange={() => {
+                    //console.log(data)
+                }}
+            />
+        )
     }
 
     if (logined) {
@@ -246,25 +240,13 @@ export function BoardDetail(props) {
                             setShowEditBoardModal(true)
                         }}>Edit</Button>
                         <Button style={{fontSize: "10px", margin: "10px 0 20px 30px"}} variant="outline-primary"
-                                        onClick={handleShare}>
+                                onClick={handleShare}>
                             Share board
                         </Button>
                     </div>
 
                     <Row>
-                        <Board
-                            cardDraggable={true}
-                            laneDraggable={false}
-                            draggable={true}
-                            editable={true}
-                            onCardAdd={handleCardAdd}
-                            onCardDelete={handleCardDelete}
-                            onCardMoveAcrossLanes={handleMoveCard}
-                            onCardClick={handleCardClick}
-                            style={{backgroundColor: 'white'}}
-                            data={data}
-                            onDataChange={() => {console.log(data)}}
-                        />
+                        <HelperBoard/>
                     </Row>
                 </div>
 
@@ -335,13 +317,14 @@ export function BoardDetail(props) {
                             <Form.Label>
                                 Enter email you want to share this board
                             </Form.Label>
-                            <HelperTooltip />
+                            <HelperTooltip/>
                             <Form.Control as="textarea" type="text" rows="7" value={sharedEmail} onChange={(e) => setSharedEmail(e.target.value)}/>
                         </Form.Group>
                     </Modal.Body>
                     <Modal.Footer>
                         <Button variant="secondary" onClick={() => {
-                            setShowShareBoardModal(false)}}>
+                            setShowShareBoardModal(false)
+                        }}>
                             Close
                         </Button>
                         <Button variant="primary" onClick={handleSubmitShare}>

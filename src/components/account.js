@@ -14,10 +14,8 @@ function Account() {
     const [email, setEmail] = useState("");
     const [firstname, setFirstName] = useState("");
     const [lastname, setLastName] = useState("");
-
+    const [mounted, setMounted] = useState(true);
     useEffect(() => {
-        let mounted = true;
-
         const params = new FormData();
         params.append('token', getCookie(config.cookie_name));
         params.append('user_id', getCookie(config.cookie_user_id));
@@ -33,11 +31,8 @@ function Account() {
                 }
             }
         });
-
-        return () => {
-            mounted = false;
-        };
-    },[]);
+        setMounted(false);
+    });
 
     function updateAccountHandler() {
         if(username==="" || email === "" || firstname==="" || lastname===""){
