@@ -10,6 +10,7 @@ function Home() {
     const logined = quickCheckToken();
     const [boards, setBoards] = useState([]);
     const [boardName, setBoardName] = useState("");
+    const [sharedBoards, setSharedBoards] = useState([]);
 
     const [show, setShow] = useState(false);
 
@@ -48,10 +49,8 @@ function Home() {
             }
         });
     };
-
+    const [mounted, setMounted] = useState(true);
     useEffect(() => {
-        let mounted = true;
-
         const params = new FormData();
         params.append('token', getCookie(config.cookie_name));
         params.append('user_id', getCookie(config.cookie_user_id));
@@ -59,15 +58,23 @@ function Home() {
         callAPI('getBoards', params, function (res) {
             if (res.success) {
                 console.log(res);
+
+                let params1 = new FormData();
+                params1.append('token', getCookie(config.cookie_name));
+                params1.append('user_id', getCookie(config.cookie_user_id));
+                callAPI('getSharedBoards', params1, res =>{
+                    if (res.success){
+                        console.log(res);
+                        setSharedBoards(res.data);
+                    }
+                });
+
                 if (mounted) {
                     setBoards(res.data);
                 }
             }
         });
-
-        return () => {
-            mounted = false;
-        };
+        setMounted(false);
     },[]);
 
     if (logined) {
@@ -96,9 +103,6 @@ function Home() {
                                             </Button>
                                         </Link>
                                         <Button variant="link" type="button" onClick={()=>handleDelete(board['id'])}>Delete</Button>
-                                        <Card.Link>
-                                            Share Link
-                                        </Card.Link>
                                     </Card.Body>
                                 </Card>
                             </Col>
@@ -108,12 +112,12 @@ function Home() {
 
                 <Modal show={show} onHide={handleClose} animation={false}>
                     <Modal.Header closeButton>
-                        <Modal.Title>Modal heading</Modal.Title>
+                        <Modal.Title>Create new board</Modal.Title>
                     </Modal.Header>
                     <Modal.Body>
                         <Form.Group controlId="boardname">
                             <Form.Label>Board name</Form.Label>
-                            <Form.Control type="text" placeholder="Username" onChange={e => setBoardName(e.target.value)}/>
+                            <Form.Control type="text"  onChange={e => setBoardName(e.target.value)}/>
                         </Form.Group>
                     </Modal.Body>
                     <Modal.Footer>
@@ -125,6 +129,35 @@ function Home() {
                         </Button>
                     </Modal.Footer>
                 </Modal>
+
+                <div style={{margin:"20px 30px"}}>
+                    <div>
+                        <span style={{fontSize: "30px"}}>Shared Boards</span>
+                    </div>
+
+                    <Row>
+                        {sharedBoards.map( board =>
+                            <Col xs>
+                                <Card style={{ width: '18rem',marginTop:"1rem" }}>
+                                    <Card.Body>
+                                        <Card.Title>{board['board_name']}</Card.Title>
+                                        <Card.Text>
+                                            User Created: {board['username']}
+                                        </Card.Text>
+                                        <Card.Text>
+                                            Date Created: {board['date_created']}
+                                        </Card.Text>
+                                        <Link to={'/detail/'+board['id']} style={{marginRight:"10px"}}>
+                                            <Button variant="link" type="button">
+                                                More
+                                            </Button>
+                                        </Link>
+                                    </Card.Body>
+                                </Card>
+                            </Col>
+                        )}
+                    </Row>
+                </div>
             </Container>
         );
     } else {
