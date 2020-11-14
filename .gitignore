@@ -25,3 +25,5 @@ yarn-error.log*
 /src/config.js
 /api/config.php
 /build
+/socketIO/node_modules
+/socketIO/package-lock.json

@@ -8,6 +8,9 @@ import {config} from "../config";
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {faInfoCircle} from "@fortawesome/free-solid-svg-icons";
 import {initData} from "./data";
+import {Subject} from 'rxjs';
+
+const updateBoardData = new Subject();
 
 export function BoardDetail(props) {
 
@@ -27,12 +30,64 @@ export function BoardDetail(props) {
     const [sharedEmail, setSharedEmail] = useState("");
     const [mounted, setMounted] = useState(true);
 
+    updateBoardData.subscribe(res => {
+        setData(res);
+    })
+
+    window.onGetBoardUpdate = false;
+    window.socketioreact.on('update_board', (res) => {
+        res = JSON.parse(res);
+        console.log(res);
+        if (res.board_id === props.match.params.id && window.onGetBoardUpdate === false) {
+            window.onGetBoardUpdate = true;
+            let params = new FormData();
+            params.append('token', getCookie(config.cookie_name));
+            params.append('board_id', props.match.params.id);
+            callAPI('getBoardDetail', params, res => {
+                console.log(res);
+                if (res.success) {
+                    let boardDetails = res.data['board_details'];
+                    let copyData = {
+                        "lanes": [
+                            {
+                                "id": "WENTWELL",
+                                "title": "WENT WELL",
+                                "cards": []
+                            },
+                            {
+                                "id": "TOIMPROVE",
+                                "title": "TO IMPROVE",
+                                "cards": []
+                            },
+                            {
+                                "id": "ACTIONITEMS",
+                                "title": "ACTION ITEMS",
+                                "cards": []
+                            }
+                        ]
+                    };
+                    for (let record of boardDetails) {
+                        let newCard = {
+                            id: record.id.toString(),
+                            title: record.title,
+                            description: record.description,
+                        }
+                        copyData.lanes.find(col => col.id === record['type']).cards.push(newCard);
+                    }
+                    console.log(copyData);
+                    updateBoardData.next(copyData);
+                    window.onGetBoardUpdate = false;
+            }});
+        }
+    });
+
+
     useEffect(() => {
-        if(mounted) {
+        if (mounted) {
             const params = new FormData();
             params.append('token', getCookie(config.cookie_name));
             params.append('board_id', props.match.params.id);
-            callAPI("getBoardDetail", params, res =>{
+            callAPI("getBoardDetail", params, res => {
                 if (res.success) {
                     let boardDetails = res.data['board_details'];
                     let copyData = {
@@ -72,6 +127,7 @@ export function BoardDetail(props) {
         }
     }, [data]);
 
+
     function handleCardAdd(card, laneId) {
         let params = new FormData();
         params.append('token', getCookie(config.cookie_name));
@@ -90,6 +146,8 @@ export function BoardDetail(props) {
         let params = new FormData();
         params.append('token', getCookie(config.cookie_name));
         params.append('card_id', cardId);
+        params.append('board_id', props.match.params.id);
+
         callAPI('deleteCard', params, res => {
             if (res.success) {
                 console.log(1);
@@ -120,6 +178,8 @@ export function BoardDetail(props) {
         params.append('token', getCookie(config.cookie_name));
         params.append('card_id', cardId);
         params.append('new_type', toLaneId);
+        params.append('board_id', props.match.params.id);
+
 
         callAPI('moveCard', params, function (res) {
         });
@@ -149,6 +209,8 @@ export function BoardDetail(props) {
         params.append('card_id', cardId);
         params.append('title', editingCard.title);
         params.append('description', editingCard.description);
+        params.append('board_id', props.match.params.id);
+
 
         callAPI('updateCard', params, res => {
             if (res.success) {
@@ -159,7 +221,7 @@ export function BoardDetail(props) {
                     for (let card of lane.cards) {
                         if (card.id === res.data.id) {
                             newData.lanes.find(col => col.id === lane.id).cards.push(res.data);
-                        }else{
+                        } else {
                             newData.lanes.find(col => col.id === lane.id).cards.push(card);
                         }
                     }
@@ -342,7 +404,7 @@ export function BoardDetail(props) {
                             <Form.Label>
                                 Board URL
                             </Form.Label>
-                            <Form.Control readOnly type="text"  value={window.location.href}/>
+                            <Form.Control readOnly type="text" value={window.location.href}/>
                         </Form.Group>
                         <Form.Group controlId="shareEmail">
                             <Form.Label>

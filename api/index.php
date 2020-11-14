@@ -32,6 +32,9 @@ switch ($_GET['action']) {
     case 'getBoardDetail':
         getBoardDetail();
         break;
+    case 'getBoardUpdate':
+        getBoardUpdate();
+        break;
     case 'signup':
         signup();
         break;
@@ -178,6 +181,17 @@ function getBoardDetail()
     responseJson(array('success' => 1, 'data' => $data));
 }
 
+//function getBoardUpdate()
+//{
+//    global $db;
+//    $db->query("update board_detail set title = '{$_POST['title']}', description = '{$_POST['description']}' where id = '{$_POST['card_id']}'");
+//    responseJson(array('success' => 1, 'data' => array(
+//        'title' => $_POST['title'],
+//        'id' => $_POST['card_id'],
+//        'description' => $_POST['description']
+//    )));
+//}
+
 function signup()
 {
     $username = $_POST['username'];
@@ -273,6 +287,15 @@ function addCard()
 {
     global $db;
     $db->query("insert into board_detail(board_id, description, title, type)  values ('{$_POST['board_id']}', '{$_POST['description']}', '{$_POST['title']}' , '{$_POST['type']}')");
+
+    //send event update board to other user
+    require_once 'socket.io.class.php';
+    $socket = new SocketIO('localhost', '3002');
+    $socket->send(array(
+        'board_id' => $_POST['board_id']
+    ));
+    //end
+
     responseJson(array('success' => 1));
 }
 
@@ -281,6 +304,15 @@ function deleteCard()
 {
     global $db;
     $db->query("delete from board_detail where id = '{$_POST['card_id']}'");
+
+    //send event update board to other user
+    require_once 'socket.io.class.php';
+    $socket = new SocketIO('localhost', '3002');
+    $socket->send(array(
+        'board_id' => $_POST['board_id']
+    ));
+    //end
+
     responseJson(array('success' => 1));
 }
 
@@ -296,6 +328,15 @@ function updateCard()
 {
     global $db;
     $db->query("update board_detail set title = '{$_POST['title']}', description = '{$_POST['description']}' where id = '{$_POST['card_id']}'");
+
+    //send event update board to other user
+    require_once 'socket.io.class.php';
+    $socket = new SocketIO('localhost', '3002');
+    $socket->send(array(
+        'board_id' => $_POST['board_id']
+    ));
+    //end
+
     responseJson(array('success' => 1, 'data' => array(
         'title' => $_POST['title'],
         'id' => $_POST['card_id'],
@@ -337,10 +378,11 @@ function getsharedEmails()
     ));
 }
 
-function getSharedBoards(){
+function getSharedBoards()
+{
     global $db;
 
-   $res = $db->query("select b.board_name, b.date_created, b.id , us2.username
+    $res = $db->query("select b.board_name, b.date_created, b.id , us2.username
                                 from users
                                          inner join share_boards sb on users.email = sb.email
                                          inner join boards b on sb.board_id = b.id
@@ -355,15 +397,24 @@ function getSharedBoards(){
                                          and us2.id <> users.id
                                 where users.id = '{$_POST['user_id']}'")->fetchAll();
 
-   responseJson(array(
-       'success' => 1,
-       'data' => $res
-   ));
+    responseJson(array(
+        'success' => 1,
+        'data' => $res
+    ));
 }
 
-function moveCard(){
+function moveCard()
+{
     global $db;
     $db->query("update board_detail set type = '{$_POST['new_type']}' where  id = '{$_POST['card_id']}'");
+
+    //send event update board to other user
+    require_once 'socket.io.class.php';
+    $socket = new SocketIO('localhost', '3002');
+    $socket->send(array(
+        'board_id' => $_POST['board_id']
+    ));
+    //end
 
     responseJson(array(
         'success' => 1
