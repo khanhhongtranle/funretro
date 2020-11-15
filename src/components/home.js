@@ -1,9 +1,11 @@
-import {callAPI, checkTokenValid, getCookie, quickCheckToken, setCookie} from "../helpers/api";
-import {BrowserRouter, Redirect, Link} from 'react-router-dom';
-import {Container, Row, Col, Card, Navbar, Nav, Modal, Button, Form} from "react-bootstrap";
+import {callAPI, getCookie, quickCheckToken} from "../helpers/api";
+import {Redirect, Link} from 'react-router-dom';
+import {Container, Row, Col, Card, Modal, Button, Form} from "react-bootstrap";
 import React, {useEffect, useState} from "react";
 import {config} from "../config";
 import Header from "./header";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import {faClock} from "@fortawesome/free-solid-svg-icons";
 
 
 function Home() {
@@ -16,7 +18,7 @@ function Home() {
 
     const handleClose = () => setShow(false);
     const handleShow = () => setShow(true);
-    const handleSaveBoard = (id) =>{
+    const handleSaveBoard = (id) => {
         const params = new FormData();
         params.append('board_name', boardName);
         params.append('user_id', getCookie(config.cookie_user_id));
@@ -33,7 +35,7 @@ function Home() {
         });
     };
 
-    const handleDelete = (id) =>{
+    const handleDelete = (id) => {
         const params = new FormData();
         params.append('id', id);
         params.append('user_id', getCookie(config.cookie_user_id));
@@ -62,8 +64,8 @@ function Home() {
                 let params1 = new FormData();
                 params1.append('token', getCookie(config.cookie_name));
                 params1.append('user_id', getCookie(config.cookie_user_id));
-                callAPI('getSharedBoards', params1, res =>{
-                    if (res.success){
+                callAPI('getSharedBoards', params1, res => {
+                    if (res.success) {
                         console.log(res);
                         setSharedBoards(res.data);
                     }
@@ -75,89 +77,93 @@ function Home() {
             }
         });
         setMounted(false);
-    },[]);
+    }, []);
 
     if (logined) {
         return (
             <Container fluid>
-               <Header />
-
-               <div style={{margin:"20px 30px"}}>
-                   <div>
-                       <span style={{fontSize: "30px"}}>My Boards</span>
-                       <Button style={{fontSize: "10px", margin: "10px 0 20px 30px"}} variant="outline-primary" onClick={handleShow}>New board</Button>
-                   </div>
-
-                    <Row>
-                        {boards.map( board =>
-                            <Col xs>
-                                <Card style={{ width: '18rem',marginTop:"1rem" }}>
-                                    <Card.Body>
-                                        <Card.Title>{board['board_name']}</Card.Title>
-                                        <Card.Text>
-                                            Date Created: {board['date_created']}
-                                        </Card.Text>
-                                        <Link to={'/detail/'+board['id']} style={{marginRight:"10px"}}>
-                                            <Button variant="link" type="button">
-                                                More
-                                            </Button>
-                                        </Link>
-                                        <Button variant="link" type="button" onClick={()=>handleDelete(board['id'])}>Delete</Button>
-                                    </Card.Body>
-                                </Card>
-                            </Col>
-                        )}
-                    </Row>
-               </div>
-
-                <Modal show={show} onHide={handleClose} animation={false}>
-                    <Modal.Header closeButton>
-                        <Modal.Title>Create new board</Modal.Title>
-                    </Modal.Header>
-                    <Modal.Body>
-                        <Form.Group controlId="boardname">
-                            <Form.Label>Board name</Form.Label>
-                            <Form.Control type="text"  onChange={e => setBoardName(e.target.value)}/>
-                        </Form.Group>
-                    </Modal.Body>
-                    <Modal.Footer>
-                        <Button variant="secondary" onClick={handleClose}>
-                            Close
-                        </Button>
-                        <Button variant="primary" onClick={handleSaveBoard}>
-                            Add
-                        </Button>
-                    </Modal.Footer>
-                </Modal>
-
-                <div style={{margin:"20px 30px"}}>
+                <Header/>
+                <Container>
                     <div>
-                        <span style={{fontSize: "30px"}}>Shared Boards</span>
+                        <div>
+                            <span style={{fontSize: "30px"}}>My Boards</span>
+                            <Button style={{fontSize: "10px", margin: "10px 0 20px 30px"}} variant="outline-primary" onClick={handleShow}>New board</Button>
+                        </div>
+
+                        <Row>
+                            {boards.map(board =>
+                                <Col xs>
+                                    <Card style={{width: '20rem', marginTop: "1rem"}}>
+                                        <Card.Body>
+                                            <Card.Title>{board['board_name']}</Card.Title>
+                                            <Card.Text>
+                                                <small>
+                                                    <FontAwesomeIcon icon={faClock}/>
+                                                    {board['date_created']}
+                                                </small>
+                                            </Card.Text>
+                                            <Link to={'/detail/' + board['id']} style={{marginRight: "10px"}}>
+                                                <Button variant="link" type="button">
+                                                    More
+                                                </Button>
+                                            </Link>
+                                            <Button variant="link" type="button" onClick={() => handleDelete(board['id'])}>Delete</Button>
+                                        </Card.Body>
+                                    </Card>
+                                </Col>
+                            )}
+                        </Row>
                     </div>
 
-                    <Row>
-                        {sharedBoards.map( board =>
-                            <Col xs>
-                                <Card style={{ width: '18rem',marginTop:"1rem" }}>
-                                    <Card.Body>
-                                        <Card.Title>{board['board_name']}</Card.Title>
-                                        <Card.Text>
-                                            User Created: {board['username']}
-                                        </Card.Text>
-                                        <Card.Text>
-                                            Date Created: {board['date_created']}
-                                        </Card.Text>
-                                        <Link to={'/detail/'+board['id']} style={{marginRight:"10px"}}>
-                                            <Button variant="link" type="button">
-                                                More
-                                            </Button>
-                                        </Link>
-                                    </Card.Body>
-                                </Card>
-                            </Col>
-                        )}
-                    </Row>
-                </div>
+                    <Modal show={show} onHide={handleClose} animation={false}>
+                        <Modal.Header closeButton>
+                            <Modal.Title>Create new board</Modal.Title>
+                        </Modal.Header>
+                        <Modal.Body>
+                            <Form.Group controlId="boardname">
+                                <Form.Label>Board name</Form.Label>
+                                <Form.Control type="text" onChange={e => setBoardName(e.target.value)}/>
+                            </Form.Group>
+                        </Modal.Body>
+                        <Modal.Footer>
+                            <Button variant="secondary" onClick={handleClose}>
+                                Close
+                            </Button>
+                            <Button variant="primary" onClick={handleSaveBoard}>
+                                Add
+                            </Button>
+                        </Modal.Footer>
+                    </Modal>
+
+                    <div style={{marginTop: "3rem"}}>
+                        <div>
+                            <span style={{fontSize: "30px"}}>Shared Boards</span>
+                        </div>
+
+                        <Row>
+                            {sharedBoards.map(board =>
+                                <Col xs>
+                                    <Card style={{width: '18rem', marginTop: "1rem"}}>
+                                        <Card.Body>
+                                            <Card.Title>{board['board_name']}</Card.Title>
+                                            <Card.Text>
+                                                User Created: {board['username']}
+                                            </Card.Text>
+                                            <Card.Text>
+                                                Date Created: {board['date_created']}
+                                            </Card.Text>
+                                            <Link to={'/detail/' + board['id']} style={{marginRight: "10px"}}>
+                                                <Button variant="link" type="button">
+                                                    More
+                                                </Button>
+                                            </Link>
+                                        </Card.Body>
+                                    </Card>
+                                </Col>
+                            )}
+                        </Row>
+                    </div>
+                </Container>
             </Container>
         );
     } else {

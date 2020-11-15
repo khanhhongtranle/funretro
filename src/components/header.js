@@ -1,6 +1,8 @@
-import {Navbar, Nav, Button} from "react-bootstrap";
+import {Navbar, Nav, Button, Container} from "react-bootstrap";
 import {deleteCookie} from "../helpers/api";
 import {config} from "../config";
+import {faSignOutAlt, faUserAlt} from "@fortawesome/free-solid-svg-icons";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 
 function Header() {
 
@@ -15,12 +17,21 @@ function Header() {
     }
 
     return (
-            <Navbar bg="primary" variant="dark">
-                <Navbar.Brand href="/">Funretro</Navbar.Brand>
-                <Nav className="mr-auto">
-                    <Button variant="light" onClick={logoutHandler}>Logout</Button>
-                    <Button onClick={accountHandler} style={{marginLeft: "20px"}} variant="outline-light">Account</Button>
-                </Nav>
+            <Navbar bg="info" variant="dark">
+                <Container>
+                    <Navbar.Brand href="/">Funretro</Navbar.Brand>
+                    <Nav className="mr-auto">
+                        <Nav.Link href="/">Home</Nav.Link>
+                    </Nav>
+                    <Button onClick={accountHandler} style={{marginRight: "1rem"}} variant="outline-light">
+                        <FontAwesomeIcon icon={faUserAlt}/>
+                        Profile
+                    </Button>
+                    <Button variant="light" onClick={logoutHandler}>
+                        <FontAwesomeIcon icon={faSignOutAlt}/>
+                        Logout
+                    </Button>
+                </Container>
             </Navbar>
     );
 }

@@ -77,7 +77,8 @@ export function BoardDetail(props) {
                     console.log(copyData);
                     updateBoardData.next(copyData);
                     window.onGetBoardUpdate = false;
-            }});
+                }
+            });
         }
     });
 
@@ -320,111 +321,113 @@ export function BoardDetail(props) {
         return (
             <Container fluid>
                 <Header/>
-                <div style={{margin: "20px 30px"}}>
-                    <div>
-                        <span style={{fontSize: "30px"}}>{boardName}</span>
-                        <Button style={{margin: "10px 0 20px 30px"}} variant="link" onClick={() => {
-                            setShowEditBoardModal(true)
-                        }}>Edit</Button>
-                        <Button style={{fontSize: "10px", margin: "10px 0 20px 30px"}} variant="outline-primary"
-                                onClick={handleShare}>
-                            Share board
-                        </Button>
+                <Container>
+                    <div style={{margin: "20px 30px"}}>
+                        <div>
+                            <span style={{fontSize: "30px"}}>{boardName}</span>
+                            <Button style={{margin: "10px 0 20px 30px"}} variant="link" onClick={() => {
+                                setShowEditBoardModal(true)
+                            }}>Edit</Button>
+                            <Button style={{fontSize: "10px", margin: "10px 0 20px 30px"}} variant="outline-primary"
+                                    onClick={handleShare}>
+                                Share board
+                            </Button>
+                        </div>
+
+                        <Row>
+                            <HelperBoard/>
+                        </Row>
                     </div>
 
-                    <Row>
-                        <HelperBoard/>
-                    </Row>
-                </div>
+                    <Modal show={showEditBoardModal} onHide={() => {
+                        setShowEditBoardModal(false)
+                    }} animation={false}>
+                        <Modal.Header closeButton>
+                            <Modal.Title>Edit board</Modal.Title>
+                        </Modal.Header>
+                        <Modal.Body>
+                            <Form.Group controlId="boardname">
+                                <Form.Label>Board name</Form.Label>
+                                <Form.Control type="text" value={newBoardName} onChange={e => setNewBoardName(e.target.value)}/>
+                            </Form.Group>
+                        </Modal.Body>
+                        <Modal.Footer>
+                            <Button variant="secondary" onClick={() => {
+                                setShowEditBoardModal(false)
+                            }}>
+                                Close
+                            </Button>
+                            <Button variant="primary" onClick={() => handleSaveBoard()}>
+                                Save
+                            </Button>
+                        </Modal.Footer>
+                    </Modal>
 
-                <Modal show={showEditBoardModal} onHide={() => {
-                    setShowEditBoardModal(false)
-                }} animation={false}>
-                    <Modal.Header closeButton>
-                        <Modal.Title>Edit board</Modal.Title>
-                    </Modal.Header>
-                    <Modal.Body>
-                        <Form.Group controlId="boardname">
-                            <Form.Label>Board name</Form.Label>
-                            <Form.Control type="text" value={newBoardName} onChange={e => setNewBoardName(e.target.value)}/>
-                        </Form.Group>
-                    </Modal.Body>
-                    <Modal.Footer>
-                        <Button variant="secondary" onClick={() => {
-                            setShowEditBoardModal(false)
-                        }}>
-                            Close
-                        </Button>
-                        <Button variant="primary" onClick={() => handleSaveBoard()}>
-                            Save
-                        </Button>
-                    </Modal.Footer>
-                </Modal>
+                    <Modal show={showEditCardModal} onHide={() => {
+                        setShowEditCardModal(false)
+                    }} animation={false}>
+                        <Modal.Header closeButton>
+                            <Modal.Title>Edit card</Modal.Title>
+                        </Modal.Header>
+                        <Modal.Body>
+                            <Form.Group controlId="cardtitle">
+                                <Form.Label>Card title</Form.Label>
+                                <Form.Control type="text" value={editingCard.title} onChange={e => {
+                                    handleChangeCardTitle(e.target.value)
+                                }}/>
+                            </Form.Group>
+                            <Form.Group controlId="carddescription">
+                                <Form.Label>Card description</Form.Label>
+                                <Form.Control type="text" value={editingCard.description} onChange={e => {
+                                    handleChangeCardDescription(e.target.value)
+                                }}/>
+                            </Form.Group>
+                        </Modal.Body>
+                        <Modal.Footer>
+                            <Button variant="secondary" onClick={() => {
+                                setShowEditCardModal(false)
+                            }}>
+                                Close
+                            </Button>
+                            <Button variant="primary" onClick={() => handleSaveCard(editingCard.id)}>
+                                Save
+                            </Button>
+                        </Modal.Footer>
+                    </Modal>
 
-                <Modal show={showEditCardModal} onHide={() => {
-                    setShowEditCardModal(false)
-                }} animation={false}>
-                    <Modal.Header closeButton>
-                        <Modal.Title>Edit card</Modal.Title>
-                    </Modal.Header>
-                    <Modal.Body>
-                        <Form.Group controlId="cardtitle">
-                            <Form.Label>Card title</Form.Label>
-                            <Form.Control type="text" value={editingCard.title} onChange={e => {
-                                handleChangeCardTitle(e.target.value)
-                            }}/>
-                        </Form.Group>
-                        <Form.Group controlId="carddescription">
-                            <Form.Label>Card description</Form.Label>
-                            <Form.Control type="text" value={editingCard.description} onChange={e => {
-                                handleChangeCardDescription(e.target.value)
-                            }}/>
-                        </Form.Group>
-                    </Modal.Body>
-                    <Modal.Footer>
-                        <Button variant="secondary" onClick={() => {
-                            setShowEditCardModal(false)
-                        }}>
-                            Close
-                        </Button>
-                        <Button variant="primary" onClick={() => handleSaveCard(editingCard.id)}>
-                            Save
-                        </Button>
-                    </Modal.Footer>
-                </Modal>
-
-                <Modal show={showShareBoardModal} onHide={() => {
-                    setShowShareBoardModal(false)
-                }} animation={false}>
-                    <Modal.Header closeButton>
-                        <Modal.Title>Share board with</Modal.Title>
-                    </Modal.Header>
-                    <Modal.Body>
-                        <Form.Group controlId="link">
-                            <Form.Label>
-                                Board URL
-                            </Form.Label>
-                            <Form.Control readOnly type="text" value={window.location.href}/>
-                        </Form.Group>
-                        <Form.Group controlId="shareEmail">
-                            <Form.Label>
-                                Enter email you want to share this board
-                            </Form.Label>
-                            <HelperTooltip/>
-                            <Form.Control as="textarea" type="text" rows="7" value={sharedEmail} onChange={(e) => setSharedEmail(e.target.value)}/>
-                        </Form.Group>
-                    </Modal.Body>
-                    <Modal.Footer>
-                        <Button variant="secondary" onClick={() => {
-                            setShowShareBoardModal(false)
-                        }}>
-                            Close
-                        </Button>
-                        <Button variant="primary" onClick={handleSubmitShare}>
-                            Submit
-                        </Button>
-                    </Modal.Footer>
-                </Modal>
+                    <Modal show={showShareBoardModal} onHide={() => {
+                        setShowShareBoardModal(false)
+                    }} animation={false}>
+                        <Modal.Header closeButton>
+                            <Modal.Title>Share board with</Modal.Title>
+                        </Modal.Header>
+                        <Modal.Body>
+                            <Form.Group controlId="link">
+                                <Form.Label>
+                                    Board URL
+                                </Form.Label>
+                                <Form.Control readOnly type="text" value={window.location.href}/>
+                            </Form.Group>
+                            <Form.Group controlId="shareEmail">
+                                <Form.Label>
+                                    Enter email you want to share this board
+                                </Form.Label>
+                                <HelperTooltip/>
+                                <Form.Control as="textarea" type="text" rows="7" value={sharedEmail} onChange={(e) => setSharedEmail(e.target.value)}/>
+                            </Form.Group>
+                        </Modal.Body>
+                        <Modal.Footer>
+                            <Button variant="secondary" onClick={() => {
+                                setShowShareBoardModal(false)
+                            }}>
+                                Close
+                            </Button>
+                            <Button variant="primary" onClick={handleSubmitShare}>
+                                Submit
+                            </Button>
+                        </Modal.Footer>
+                    </Modal>
+                </Container>
             </Container>
         );
     } else {
