@@ -1,4 +1,4 @@
-import {Form, Button, Container, Card, Col, Row} from 'react-bootstrap';
+import {Form, Button, Container, Card, Col, Row, Modal} from 'react-bootstrap';
 import React, {useEffect, useState} from "react";
 import {callAPI, getCookie, quickCheckToken, setCookie} from "../helpers/api";
 import {config} from "../config";
@@ -11,6 +11,8 @@ function Account() {
     const [username, setUsername] = useState("");
     const [oldPassword, setOldPassword] = useState("");
     const [newPassword, setNewPassword] = useState("");
+    const [confirmPassword, setConfirmPassword] = useState("");
+    const [showChangePassword, setShowChangePassword] = useState(false);
     const [email, setEmail] = useState("");
     const [firstname, setFirstName] = useState("");
     const [lastname, setLastName] = useState("");
@@ -43,25 +45,50 @@ function Account() {
         const params = new FormData();
         params.append('token', getCookie(config.cookie_name));
         params.append('username', username);
-        params.append('oldPassword', oldPassword);
-        params.append('newPassword', newPassword);
         params.append('email', email);
         params.append('firstname', firstname);
         params.append('lastname', lastname);
 
         callAPI('updateUserInfo', params, function (res) {
             console.log(res);
-            if (res.success && res.data['change_pass']) {
-                alert('Updated info and password!');
-            }else if(res.success && res.old_pass_not_valid) {
-                alert('Updated info! Old password not valid - password not change!');
-            }else if(res.success){
-                alert('Updated info!');
-            } else {
-                alert('Failed');
+            if (res.success) {
+                alert('Infor is updated.');
             }
         });
     }
+
+    function handleChangePassword(){
+        if (oldPassword === '' || newPassword === '' || confirmPassword === ''){
+            alert('Please input field required!');
+            return;
+        }
+
+        if (newPassword !== confirmPassword){
+            alert('confirm password is incorrect!');
+            return;
+        }
+
+        const params = new FormData();
+        params.append('token', getCookie(config.cookie_name));
+        params.append('username', username);
+        params.append('old_password', oldPassword);
+        params.append('new_password', newPassword);
+
+        callAPI('updateUserPassword', params, function (res) {
+            console.log(res);
+            if (res.success) {
+                if (res.data['change_pass']){
+                    alert('Changed password');
+                }
+                else if (res.data['old_pass_not_valid']){
+                    alert('Old password is incorrect!');
+                }
+
+                setShowChangePassword(false);
+            }
+        });
+    }
+
     if (logined) {
         return (
             <Container fluid>
@@ -78,29 +105,12 @@ function Account() {
                                 </Form.Group>
                             </Col>
                             <Col xs={6}>
-                                <Form.Group controlId="password">
-                                    <Form.Label>Old Password</Form.Label>
-                                    <Form.Control value={oldPassword} type="password" placeholder="Password" onChange={e => setOldPassword(e.target.value)}/>
-                                </Form.Group>
-                            </Col>
-                        </Row>
-
-                        <Row>
-                            <Col xs={6}>
                                 <Form.Group controlId="email">
                                     <Form.Label>Email *</Form.Label>
                                     <Form.Control value={email} type="text" placeholder="Email" onChange={e => setEmail(e.target.value)}/>
                                 </Form.Group>
                             </Col>
-                            <Col xs={6}>
-                                <Form.Group controlId="password">
-                                    <Form.Label>New Password</Form.Label>
-                                    <Form.Control value={newPassword} type="password" placeholder="Password" onChange={e => setNewPassword(e.target.value)}/>
-                                </Form.Group>
-                            </Col>
                         </Row>
-
-
                         <Row>
                             <Col xs={6}>
                                 <Form.Group controlId="firstname">
@@ -117,9 +127,51 @@ function Account() {
                         </Row>
 
                         <Button onClick={updateAccountHandler} variant="primary" type="button">Change</Button>
-                        <Link style={{marginLeft: "20px"}} to="/">Back</Link>
+                        <Link style={{margin: "0 20px"}} to="/">Back</Link>
+                        <Button variant="success" type="button" onClick={() => setShowChangePassword(true)}>Change password</Button>
                     </Form>
                 </Card>
+
+                <Modal show={showChangePassword} onHide={() => setShowChangePassword(false)}>
+                    <Modal.Header closeButton>
+                        <Modal.Title>Change password</Modal.Title>
+                    </Modal.Header>
+
+                    <Modal.Body>
+                        <Form>
+                            <Row>
+                                <Col>
+                                    <Form.Group controlId="password">
+                                        <Form.Label>Old password *</Form.Label><br/>
+                                        <Form.Control value={oldPassword} type="password" onChange={e => setOldPassword(e.target.value)}/>
+                                    </Form.Group>
+                                </Col>
+                            </Row>
+                            <Row>
+                                <Col>
+                                    <Form.Group controlId="newpassword">
+                                        <Form.Label>New password *</Form.Label>
+                                        <Form.Control value={newPassword} type="password" onChange={e => setNewPassword(e.target.value)}/>
+                                    </Form.Group>
+                                </Col>
+                            </Row>
+                            <Row>
+                                <Col>
+                                    <Form.Group controlId="confirmpassword">
+                                        <Form.Label>Confirm password *</Form.Label>
+                                        <Form.Control value={confirmPassword} type="password" onChange={e => setConfirmPassword(e.target.value)}/>
+                                    </Form.Group>
+                                </Col>
+                            </Row>
+                        </Form>
+                    </Modal.Body>
+
+                    <Modal.Footer>
+                        <Button variant="secondary" onClick={() => setShowChangePassword(false)} >Close</Button>
+                        <Button variant="primary" onClick={handleChangePassword}>Save changes</Button>
+                    </Modal.Footer>
+                </Modal>
+
             </Container>
             </Container>
         );

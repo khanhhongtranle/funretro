@@ -32,14 +32,14 @@ switch ($_GET['action']) {
     case 'getBoardDetail':
         getBoardDetail();
         break;
-    case 'getBoardUpdate':
-        getBoardUpdate();
-        break;
     case 'signup':
         signup();
         break;
     case 'getUserInfo':
         getUserInfo();
+        break;
+    case 'updateUserPassword':
+        updateUserPassword();
         break;
     case 'updateUserInfo':
         updateUserInfo();
@@ -234,14 +234,21 @@ function updateUserInfo()
                  last_name='{$_POST['lastname']}'
                  where username='{$_POST['username']}'");
 
-    if (!empty($_POST['oldPassword']) && !empty($_POST['newPassword'])) {
+
+    responseJson(array('success' => 1, 'data' => $data));
+}
+
+function updateUserPassword(){
+    global  $db;
+
+    if (!empty($_POST['old_password']) && !empty($_POST['new_password'])) {
         //kiểm tra old password
         $res = $db->query("select * from users where username='{$_POST['username']}'")->fetchAll();
         if (count($res) > 0) {
             $user = $res[0];
-            if (md5($_POST['oldPassword']) == $user['hash_pass']) {
+            if (md5($_POST['old_password']) == $user['hash_pass']) {
                 //md5 new password
-                $pass = md5($_POST['newPassword']);
+                $pass = md5($_POST['new_password']);
                 $db->query("update users set hash_pass='{$pass}' where username='{$_POST['username']}'");
                 $data['change_pass'] = 1;
             } else {
@@ -249,6 +256,7 @@ function updateUserInfo()
             }
         }
     }
+
     responseJson(array('success' => 1, 'data' => $data));
 }
 
