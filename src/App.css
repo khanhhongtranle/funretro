@@ -39,3 +39,45 @@
 body,html{
     background-color: #f3f3f3;
 }
+
+.link{
+    text-decoration: none;
+    color: #000000;
+    margin-right: 10px;
+}
+
+.link:hover{
+    text-decoration: none;
+    color: #000000;
+}
+
+.mycard{
+    width: 20rem;
+    margin-top: 1rem;
+    cursor: pointer;
+}
+
+.mycard:hover{
+    box-shadow: 8px 8px #efeeee;
+}
+
+.delete{
+    position: relative;
+    float:right;
+    top: -0.5rem;
+    right: -0.4rem;
+    color: #acacac
+}
+
+.delete:hover{
+    color: red;
+}
+
+.edit{
+    margin: 0 0.5rem;
+    cursor: pointer;
+}
+
+.edit:hover{
+    color: #18a2b8;
+}

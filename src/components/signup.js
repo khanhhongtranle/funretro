@@ -33,7 +33,7 @@ function Signup() {
          params.append('lastname', lastname);
 
         callAPI('signup', params, function (res) {
-            console.log(res);
+            //console.log(res);
             if (res.success) {
                 window.location.href = "/login";
             } else {
@@ -93,7 +93,7 @@ function Signup() {
                         </Col>
                     </Row>
 
-                    <Button onClick={signupHandler} variant="primary" type="button">Submit</Button>
+                    <Button onClick={signupHandler} variant="info" type="button">Submit</Button>
                     <Link style={{marginLeft: "20px"}} to="/login">Login</Link>
                 </Form>
             </Card>

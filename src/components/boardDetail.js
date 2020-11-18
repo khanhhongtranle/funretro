@@ -1,14 +1,15 @@
 import React, {useEffect, useState} from "react";
 import Board from "react-trello";
-import {Button, Container, Form, Modal, Row, OverlayTrigger, Tooltip} from "react-bootstrap";
+import {Button, Container, Form, Modal, Row, OverlayTrigger, Tooltip, Card} from "react-bootstrap";
 import Header from "./header";
 import {callAPI, getCookie, quickCheckToken} from "../helpers/api";
 import {Redirect} from "react-router-dom";
 import {config} from "../config";
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
-import {faInfoCircle} from "@fortawesome/free-solid-svg-icons";
+import {faInfoCircle, faPencilAlt, faTimes} from "@fortawesome/free-solid-svg-icons";
 import {initData} from "./data";
 import {Subject} from 'rxjs';
+import $ from "jquery";
 
 const updateBoardData = new Subject();
 
@@ -32,19 +33,21 @@ export function BoardDetail(props) {
 
     updateBoardData.subscribe(res => {
         setData(res);
-    })
+    });
+
+    //$('[placeholder=label]').remove();
 
     window.onGetBoardUpdate = false;
     window.socketioreact.on('update_board', (res) => {
         res = JSON.parse(res);
-        console.log(res);
+      //  console.log(res);
         if (res.board_id === props.match.params.id && window.onGetBoardUpdate === false) {
             window.onGetBoardUpdate = true;
             let params = new FormData();
             params.append('token', getCookie(config.cookie_name));
             params.append('board_id', props.match.params.id);
             callAPI('getBoardDetail', params, res => {
-                console.log(res);
+              //  console.log(res);
                 if (res.success) {
                     let boardDetails = res.data['board_details'];
                     let copyData = {
@@ -74,7 +77,6 @@ export function BoardDetail(props) {
                         }
                         copyData.lanes.find(col => col.id === record['type']).cards.push(newCard);
                     }
-                    console.log(copyData);
                     updateBoardData.next(copyData);
                     window.onGetBoardUpdate = false;
                 }
@@ -138,7 +140,7 @@ export function BoardDetail(props) {
         params.append('type', laneId);
         callAPI('addCard', params, res => {
             if (res.success) {
-                console.log(1);
+               // console.log(1);
             }
         })
     }
@@ -151,7 +153,7 @@ export function BoardDetail(props) {
 
         callAPI('deleteCard', params, res => {
             if (res.success) {
-                console.log(1);
+              //  console.log(1);
             }
         })
     }
@@ -171,9 +173,6 @@ export function BoardDetail(props) {
     }
 
     function handleMoveCard(fromLaneId, toLaneId, cardId, index) {
-
-        console.log(toLaneId);
-        console.log(cardId);
 
         const params = new FormData();
         params.append('token', getCookie(config.cookie_name));
@@ -290,7 +289,7 @@ export function BoardDetail(props) {
         callAPI('shareBoard', params, res => {
             //console.log(res);
             if (res.success) {
-                console.log(1);
+                //console.log(1);
             }
 
             setShowShareBoardModal(false);
@@ -308,11 +307,9 @@ export function BoardDetail(props) {
                 onCardDelete={handleCardDelete}
                 onCardMoveAcrossLanes={handleMoveCard}
                 onCardClick={handleCardClick}
-                style={{backgroundColor: 'white'}}
+                style={{backgroundColor: '#f3f3f3', margin: "auto"}}
                 data={data}
-                onDataChange={() => {
-                    //console.log(data)
-                }}
+                labelStyle={{color: "#fff"}}
             />
         )
     }
@@ -323,12 +320,10 @@ export function BoardDetail(props) {
                 <Header/>
                 <Container>
                     <div style={{margin: "20px 30px"}}>
-                        <div>
+                        <div style={{textAlign: "center"}}>
                             <span style={{fontSize: "30px"}}>{boardName}</span>
-                            <Button style={{margin: "10px 0 20px 30px"}} variant="link" onClick={() => {
-                                setShowEditBoardModal(true)
-                            }}>Edit</Button>
-                            <Button style={{fontSize: "10px", margin: "10px 0 20px 30px"}} variant="outline-primary"
+                            <FontAwesomeIcon className="edit" onClick={() => {setShowEditBoardModal(true)}} icon={faPencilAlt}/>
+                            <Button style={{fontSize: "10px", margin: "10px 0 20px 30px"}} variant="info"
                                     onClick={handleShare}>
                                 Share board
                             </Button>
@@ -357,7 +352,7 @@ export function BoardDetail(props) {
                             }}>
                                 Close
                             </Button>
-                            <Button variant="primary" onClick={() => handleSaveBoard()}>
+                            <Button variant="info" onClick={() => handleSaveBoard()}>
                                 Save
                             </Button>
                         </Modal.Footer>
@@ -389,7 +384,7 @@ export function BoardDetail(props) {
                             }}>
                                 Close
                             </Button>
-                            <Button variant="primary" onClick={() => handleSaveCard(editingCard.id)}>
+                            <Button variant="info" onClick={() => handleSaveCard(editingCard.id)}>
                                 Save
                             </Button>
                         </Modal.Footer>
@@ -422,7 +417,7 @@ export function BoardDetail(props) {
                             }}>
                                 Close
                             </Button>
-                            <Button variant="primary" onClick={handleSubmitShare}>
+                            <Button variant="info" onClick={handleSubmitShare}>
                                 Submit
                             </Button>
                         </Modal.Footer>

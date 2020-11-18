@@ -24,7 +24,7 @@ function Account() {
 
         callAPI('getUserInfo', params, function (res) {
             if (res.success) {
-                console.log(res);
+               // console.log(res);
                 if (mounted) {
                     setUsername(res.data['username']);
                     setEmail(res.data['email']);
@@ -50,7 +50,7 @@ function Account() {
         params.append('lastname', lastname);
 
         callAPI('updateUserInfo', params, function (res) {
-            console.log(res);
+            //console.log(res);
             if (res.success) {
                 alert('Infor is updated.');
             }
@@ -75,7 +75,7 @@ function Account() {
         params.append('new_password', newPassword);
 
         callAPI('updateUserPassword', params, function (res) {
-            console.log(res);
+           // console.log(res);
             if (res.success) {
                 if (res.data['change_pass']){
                     alert('Changed password');
@@ -126,9 +126,9 @@ function Account() {
                             </Col>
                         </Row>
 
-                        <Button onClick={updateAccountHandler} variant="primary" type="button">Change</Button>
+                        <Button onClick={updateAccountHandler} variant="info" type="button">Change</Button>
                         <Link style={{margin: "0 20px"}} to="/">Back</Link>
-                        <Button variant="success" type="button" onClick={() => setShowChangePassword(true)}>Change password</Button>
+                        <Button variant="outline-info" type="button" onClick={() => setShowChangePassword(true)}>Change password</Button>
                     </Form>
                 </Card>
 
@@ -168,7 +168,7 @@ function Account() {
 
                     <Modal.Footer>
                         <Button variant="secondary" onClick={() => setShowChangePassword(false)} >Close</Button>
-                        <Button variant="primary" onClick={handleChangePassword}>Save changes</Button>
+                        <Button variant="info" onClick={handleChangePassword}>Save changes</Button>
                     </Modal.Footer>
                 </Modal>
 

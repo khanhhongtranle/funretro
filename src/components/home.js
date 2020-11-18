@@ -5,7 +5,7 @@ import React, {useEffect, useState} from "react";
 import {config} from "../config";
 import Header from "./header";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faClock} from "@fortawesome/free-solid-svg-icons";
+import {faClock, faTimes, faUser} from "@fortawesome/free-solid-svg-icons";
 
 
 function Home() {
@@ -25,7 +25,7 @@ function Home() {
         params.append('token', getCookie(config.cookie_name));
 
         callAPI('saveBoard', params, function (res) {
-            console.log(res);
+            //console.log(res);
             if (res.success) {
                 setShow(false);
                 setBoards(res.data);
@@ -42,7 +42,7 @@ function Home() {
         params.append('token', getCookie(config.cookie_name));
 
         callAPI('deleteBoard', params, function (res) {
-            console.log(res);
+            //console.log(res);
             if (res.success) {
                 setShow(false);
                 setBoards(res.data);
@@ -59,14 +59,14 @@ function Home() {
 
         callAPI('getBoards', params, function (res) {
             if (res.success) {
-                console.log(res);
+                //console.log(res);
 
                 let params1 = new FormData();
                 params1.append('token', getCookie(config.cookie_name));
                 params1.append('user_id', getCookie(config.cookie_user_id));
                 callAPI('getSharedBoards', params1, res => {
                     if (res.success) {
-                        console.log(res);
+                       // console.log(res);
                         setSharedBoards(res.data);
                     }
                 });
@@ -85,31 +85,28 @@ function Home() {
                 <Header/>
                 <Container>
                     <div>
-                        <div>
+                        <div style={{marginTop: "2rem"}}>
                             <span style={{fontSize: "30px"}}>My Boards</span>
-                            <Button style={{fontSize: "10px", margin: "10px 0 20px 30px"}} variant="outline-primary" onClick={handleShow}>New board</Button>
+                            <Button style={{fontSize: "15px", margin: "10px 0 20px 30px"}} variant="info" onClick={handleShow}>New board</Button>
                         </div>
 
                         <Row>
                             {boards.map(board =>
                                 <Col xs>
-                                    <Card style={{width: '20rem', marginTop: "1rem"}}>
-                                        <Card.Body>
-                                            <Card.Title>{board['board_name']}</Card.Title>
-                                            <Card.Text>
-                                                <small>
-                                                    <FontAwesomeIcon icon={faClock}/>
-                                                    {board['date_created']}
-                                                </small>
-                                            </Card.Text>
-                                            <Link to={'/detail/' + board['id']} style={{marginRight: "10px"}}>
-                                                <Button variant="link" type="button">
-                                                    More
-                                                </Button>
-                                            </Link>
-                                            <Button variant="link" type="button" onClick={() => handleDelete(board['id'])}>Delete</Button>
-                                        </Card.Body>
-                                    </Card>
+                                    <Link className="link" to={'/detail/' + board['id']}>
+                                        <Card className="mycard">
+                                            <Card.Body>
+                                                <FontAwesomeIcon onClick={() => handleDelete(board['id'])} className="delete" icon={faTimes}/>
+                                                <Card.Title>{board['board_name']}</Card.Title>
+                                                <Card.Text>
+                                                    <small>
+                                                        <FontAwesomeIcon style={{marginRight: "5px",  color: "#acacac"}} icon={faClock}/>
+                                                        {board['date_created']}
+                                                    </small>
+                                                </Card.Text>
+                                            </Card.Body>
+                                        </Card>
+                                    </Link>
                                 </Col>
                             )}
                         </Row>
@@ -129,7 +126,7 @@ function Home() {
                             <Button variant="secondary" onClick={handleClose}>
                                 Close
                             </Button>
-                            <Button variant="primary" onClick={handleSaveBoard}>
+                            <Button variant="info" onClick={handleSaveBoard}>
                                 Add
                             </Button>
                         </Modal.Footer>
@@ -143,22 +140,21 @@ function Home() {
                         <Row>
                             {sharedBoards.map(board =>
                                 <Col xs>
-                                    <Card style={{width: '18rem', marginTop: "1rem"}}>
-                                        <Card.Body>
-                                            <Card.Title>{board['board_name']}</Card.Title>
-                                            <Card.Text>
-                                                User Created: {board['username']}
-                                            </Card.Text>
-                                            <Card.Text>
-                                                Date Created: {board['date_created']}
-                                            </Card.Text>
-                                            <Link to={'/detail/' + board['id']} style={{marginRight: "10px"}}>
-                                                <Button variant="link" type="button">
-                                                    More
-                                                </Button>
-                                            </Link>
-                                        </Card.Body>
-                                    </Card>
+                                    <Link className="link" to={'/detail/' + board['id']}>
+                                        <Card className="mycard">
+                                            <Card.Body>
+                                                <Card.Title>{board['board_name']}</Card.Title>
+                                                <Card.Text>
+                                                    <FontAwesomeIcon style={{marginRight: "5px", color: "#acacac"}} icon={faUser}/>
+                                                    User Created: {board['username']}
+                                                </Card.Text>
+                                                <Card.Text>
+                                                    <FontAwesomeIcon style={{marginRight: "5px",  color: "#acacac"}} icon={faClock}/>
+                                                    {board['date_created']}
+                                                </Card.Text>
+                                            </Card.Body>
+                                        </Card>
+                                    </Link>
                                 </Col>
                             )}
                         </Row>

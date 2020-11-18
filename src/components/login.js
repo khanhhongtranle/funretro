@@ -88,7 +88,7 @@ function Login() {
 
                     <Row>
                         <Col>
-                            <Button onClick={actionLogin} variant="success" type="button">Login</Button>
+                            <Button onClick={actionLogin} variant="info" type="button">Login</Button>
                         </Col>
                         <Col style={{textAlign:"right"}}>
                             <Link style={{marginLeft: "20px", marginRight: "20px"}} to="/signup">Sign up</Link>

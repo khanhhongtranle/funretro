@@ -298,7 +298,7 @@ function addCard()
 
     //send event update board to other user
     require_once 'socket.io.class.php';
-    $socket = new SocketIO('localhost', '3002');
+    $socket = new SocketIO('localhost', '9020');
     $socket->send(array(
         'board_id' => $_POST['board_id']
     ));
@@ -315,7 +315,7 @@ function deleteCard()
 
     //send event update board to other user
     require_once 'socket.io.class.php';
-    $socket = new SocketIO('localhost', '3002');
+    $socket = new SocketIO('localhost', '9020');
     $socket->send(array(
         'board_id' => $_POST['board_id']
     ));
@@ -339,7 +339,7 @@ function updateCard()
 
     //send event update board to other user
     require_once 'socket.io.class.php';
-    $socket = new SocketIO('localhost', '3002');
+    $socket = new SocketIO('localhost', '9020');
     $socket->send(array(
         'board_id' => $_POST['board_id']
     ));
@@ -418,7 +418,7 @@ function moveCard()
 
     //send event update board to other user
     require_once 'socket.io.class.php';
-    $socket = new SocketIO('localhost', '3002');
+    $socket = new SocketIO('localhost', '9020');
     $socket->send(array(
         'board_id' => $_POST['board_id']
     ));
